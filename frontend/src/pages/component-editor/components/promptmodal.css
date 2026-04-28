@@ -1,0 +1,139 @@
+.prompt-wrapper {
+     position: fixed;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     background: white;
+     border-radius: 12px;
+     padding: 20px;
+     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+     display: flex;
+     flex-wrap: wrap;
+     justify-content: center;
+     flex-direction: column;
+     gap: 12px;
+     overflow-y: auto;
+     z-index: 1000;
+     border: 2px solid var(--red-400);
+}
+
+.prompt-header {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     gap: 10px;
+     margin-bottom: 12px;
+}
+
+.prompt-header h3 {
+     font-size: 18px;
+     font-weight: 600;
+     color: #333;
+     margin: 0;
+}
+
+.prompt-header h3 span {
+     color: var(--primary);
+     font-weight: 800;
+}
+
+.prompt-icon {
+     width: 50px;
+     height: 50px;
+     background: #fff1f0;
+     color: var(--primary);
+     border-radius: 8px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+}
+
+.prompt-body {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     gap: 20px;
+}
+
+.prompt-body textarea {
+     border-radius: 8px;
+     border: 2px solid #FEE2E2;
+     font-size: 16px;
+     padding: 5px;
+}
+
+.prompt-btns {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: flex-end;
+     gap: 20px;
+     width: 100%;
+}
+
+.prompt-btns button {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 10px;
+     padding: 10px 20px;
+     border-radius: 8px;
+}
+
+.prompt-cancel-btn {
+     background-color: var(--red-50);
+     transition: all 0.3s ease-in-out;
+}
+
+.prompt-cancel-btn:hover {
+     background-color: var(--red-200);
+}
+
+.prompt-generate-btn {
+     background-color: var(--primary);
+     color: white;
+     transition: all 0.3s ease-in-out;
+     box-shadow: var(--btn-shadow-normal);
+}
+
+.prompt-generate-btn:hover {
+     background-color: var(--primary-hover);
+     box-shadow: var(--btn-shadow-hover);
+}
+
+.json-output-wrapper {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: space-around;
+     gap: 20px;
+     width: 100%;
+}
+
+.copy-icon {
+     cursor: pointer;
+}
+
+
+
+/* Loader */
+.file-loader {
+     width: 32px;
+     height: 32px;
+     border-radius: 50%;
+     background:
+          radial-gradient(farthest-side, white 94%, #0000) top/8px 8px no-repeat,
+          conic-gradient(#0000 30%, white);
+     -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+     mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+     animation: l13 1s infinite linear;
+}
+
+@keyframes l13 {
+     100% {
+          transform: rotate(1turn);
+     }
+}

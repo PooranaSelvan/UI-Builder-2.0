@@ -1,0 +1,513 @@
+.home-wrapper {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+}
+
+
+/* Home hero  */
+.home-hero {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: space-evenly;
+     flex-direction: column;
+     height: 95vh;
+     width: 100%;
+     background-color: var(--red-50);
+     padding-top: 200px;
+     border-bottom: 1px solid var(--red-200);
+}
+
+.home-hero-wrapper {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     width: 100%;
+}
+
+.home-hero-content {
+     display: flex;
+     flex-wrap: wrap;
+     justify-content: center;
+     flex-direction: column;
+     gap: 20px;
+}
+
+.home-hero-content h1 {
+     font-size: 60px;
+     font-weight: 900;
+     width: 60%;
+}
+
+.gradient-text {
+     color: var(--primary);
+}
+
+.home-hero-content p {
+     font-size: 20px;
+     width: 50ch;
+}
+
+.home-hero-btns {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     gap: 20px;
+}
+
+.video-btn {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     padding: 12px 32px;
+     font-size: 16px;
+     font-weight: 600;
+     color: var(--primary);
+     background-color: white;
+     border: 1px solid var(--red-300);
+     border-radius: 12px;
+}
+
+.video-btn:hover {
+     border: 1px solid var(--red-500);
+     background-color: var(--red-50);
+}
+
+
+
+/* Scroll To Explore */
+.scrollToExplore {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     gap: 10px;
+     animation: scroll-float 1s ease-in-out infinite;
+     position: relative;
+     bottom: -80px;
+}
+
+.scrollToExplore p {
+     font-size: 14px;
+}
+
+
+/* How It Works */
+.steps {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     padding: 50px;
+     gap: 0px;
+}
+
+.steps h1:first-child {
+     font-size: 50px;
+     font-weight: 900;
+}
+
+.step-gradient {
+     color: var(--primary);
+}
+
+.steps p {
+     color: var(--text-secondary);
+     font-size: 18px;
+}
+
+/* Steps Card */
+.steps-cards {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: space-evenly;
+     padding-top: 100px;
+     gap: 50px;
+}
+
+.steps-card {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: flex-start;
+     justify-content: center;
+     flex-direction: column;
+     gap: 15px;
+     padding: 40px 20px;
+     border-radius: 12px;
+     background-color: var(--red-50);
+     border: 1px solid var(--red-200);
+     transition: all 0.3s ease-in-out;
+}
+
+.steps-card:hover {
+     transform: translateY(-2px);
+     box-shadow: 0px 2px 10px rgba(255, 128, 128, 0.432);
+     border: 1px solid var(--primary);
+}
+
+.steps-card:hover .step-heading {
+     color: var(--primary);
+}
+.step-icon {
+     border: 2px solid transparent;
+     transition: all 0.3s ease-in-out;
+}
+
+.steps-card:hover .step-icon {
+     border: 2px solid var(--primary);
+}
+
+.step-number {
+     width: 3rem;
+     height: 3rem;
+     border-radius: 50%;
+     background-color: var(--primary);
+     color: white;
+     font-size: 20px;
+     display: grid;
+     place-items: center;
+}
+
+.step-icon {
+     padding: 15px;
+     background-color: #fff;
+     border-radius: 12px;
+     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.step-heading {
+     font-size: 24px;
+}
+
+.steps-card p {
+     max-width: 40ch;
+     font-size: 16px;
+     color: var(--text-secondary);
+}
+
+
+
+
+/* Get Started */
+.get-started {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     background-color: var(--red-50);
+     width: 100%;
+     padding: 50px;
+     color: white;
+     position: relative;
+     border-top: 1px solid var(--red-200);
+     border-bottom: 1px solid var(--red-200);
+}
+
+.starter-card {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     gap: 20px;
+     background: var(--primary);
+     padding: 100px 200px;
+     border-radius: 32px;
+     box-shadow: 0px 0px 10px var(--btn-shadow-normal);
+}
+
+.starter-card h1 {
+     font-size: 50px;
+     font-weight: 800;
+     letter-spacing: 1px;
+}
+
+.starter-card p {
+     font-size: 18px;
+     color: rgb(243, 243, 243);
+}
+
+.starter-pattern {
+     top: 200px;
+     inset: 0;
+     opacity: 0.1;
+     position: absolute;
+     background-image: radial-gradient(white 2px, transparent 2px);
+     background-size: 24px 24px;
+     pointer-events: none;
+}
+
+.starter-gradient {
+     background-color: rgba(255, 255, 255, 0.212);
+     padding: 5px 15px;
+     border-radius: 15px;
+     margin-left: 20px;
+}
+
+
+
+/* Gradient Round */
+.home-gradient-round-blur {
+     position: absolute;
+     top: 100px;
+     left: 100px;
+     width: 18rem;
+     height: 18rem;
+     background-color: var(--red-200);
+     border-radius: 50%;
+     filter: blur(64px);
+     animation: pulse 3s ease-in-out infinite;
+}
+
+.canvas-gradient-round-blur {
+     position: absolute;
+     top: 650px;
+     right: 80px;
+     width: 18rem;
+     height: 18rem;
+     background-color: var(--red-200);
+     border-radius: 50%;
+     filter: blur(64px);
+     animation: pulse 3s ease-in-out infinite;
+}
+
+
+/* Demo Video */
+.demo-modal {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     position: fixed;
+     z-index: 20;
+     background-color: #ffffff00;
+     backdrop-filter: blur(5px);
+     background-color: rgba(0, 0, 0, 0.4);
+     height: 100%;
+     width: 100%;
+}
+
+.demo-frame {
+     border: none;
+     border-radius: 15px;
+     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+     width: 100%;
+     max-width: 1200px;
+     aspect-ratio: 16 / 9;
+}
+
+.demo-close {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 10px;
+     position: absolute;
+     top: 150px;
+     right: 360px;
+     padding: 10px 30px;
+     background-color: var(--primary);
+     color: white;
+     border-radius: 12px;
+     box-shadow: var(--btn-shadow-normal);
+     transition: all 0.2s ease-in-out;
+}
+
+.demo-close:hover {
+     background-color: var(--primary-hover);
+}
+
+
+
+/* Animation */
+@keyframes pulse {
+
+     0%,
+     100% {
+          opacity: 0.6;
+     }
+
+     50% {
+          opacity: 1;
+     }
+}
+
+@keyframes scroll-float {
+
+     0%,
+     100% {
+          transform: translateY(0);
+     }
+
+     50% {
+          transform: translateY(-5px);
+     }
+}
+
+
+/* Media Query */
+@media screen and (max-width: 1370px) {
+     .home-gradient-round-blur {
+          display: none;
+     }
+
+     .scrollToExplore {
+          display: none;
+     }
+}
+
+@media screen and (max-width : 1319px) {
+     .home-hero-content {
+          align-items: center;
+     }
+
+     .canvas-wrapper {
+          margin-top: 50px;
+     }
+}
+
+@media screen and (max-width: 1024px) {
+     .home-hero-content h1 {
+          font-size: 48px;
+          width: 80%;
+     }
+
+     .home-hero-content p {
+          width: 60ch;
+     }
+
+     /* Get Started */
+     .starter-card {
+          padding: 50px;
+          border-radius: 24px;
+     }
+
+     .starter-card h1 {
+          font-size: 30px;
+          text-align: center;
+     }
+
+     .starter-card p {
+          font-size: 16px;
+          text-align: center;
+     }
+
+     .home-gradient-round-blur {
+          display: none;
+     }
+
+     .scrollToExplore {
+          display: none;
+     }
+
+     .demo-frame {
+          max-width: 95vw;
+     }
+}
+
+@media screen and (max-width: 768px) {
+
+     /* Home Hero */
+     .home-hero {
+          height: auto;
+          padding-top: 120px;
+          padding-bottom: 80px;
+     }
+
+     .home-hero-content h1 {
+          font-size: 36px;
+          width: 100%;
+          text-align: center;
+     }
+
+     .home-hero-content p {
+          width: 100%;
+          font-size: 16px;
+          text-align: center;
+     }
+
+     .home-hero-btns {
+          justify-content: center;
+     }
+
+     /* Steps */
+     .steps {
+          padding: 30px 20px;
+     }
+
+     .steps h1:first-child {
+          font-size: 36px;
+          text-align: center;
+     }
+
+     .steps p {
+          text-align: center;
+          font-size: 16px;
+     }
+
+     .steps-cards {
+          padding-top: 50px;
+          gap: 30px;
+     }
+
+     .steps-card {
+          width: 100%;
+     }
+
+     /* Gradient Round */
+     .home-gradient-round-blur,
+     .canvas-gradient-round-blur {
+          display: none;
+     }
+
+}
+
+
+@media screen and (max-width:600px) {
+
+     .demo-frame {
+          aspect-ratio: 16 / 9;
+          border-radius: 10px;
+     }
+
+     .demo-close {
+          top: 15px;
+          right: 15px;
+          padding: 6px 16px;
+          font-size: 12px;
+     }
+
+     .demo-close {
+          display: none;
+     }
+}
+
+@media screen and (max-width: 480px) {
+
+     .home-hero-content h1 {
+          font-size: 28px;
+     }
+
+     .get-started-btn {
+          width: 70%;
+          justify-content: center;
+     }
+
+     .video-btn {
+          width: 70%;
+          justify-content: center;
+     }
+
+     .steps-card p {
+          text-align: left;
+          max-width: 100%;
+     }
+
+}

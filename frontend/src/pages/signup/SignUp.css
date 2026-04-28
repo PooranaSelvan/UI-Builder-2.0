@@ -1,0 +1,220 @@
+.signup-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-soft);
+
+}
+
+
+.signup-card {
+  width: 450px;
+  padding: 36px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08);
+}
+
+.signup-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.signup-subtitle {
+  text-align: center;
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.signup-form {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.signup-input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--red-300);
+  font-size: 14px;
+  position: relative;
+  padding-left: 44px;
+}
+
+.signup-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.password-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.terms-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.signup-btn {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.divider {
+  margin: 18px 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.google-btn {
+  border: 1px solid var(--red-300);
+  padding: 11px;
+  border-radius: 10px;
+  background: white;
+  font-size: 16px;
+  color: black;
+  cursor: pointer;
+  text-align: center;
+}
+
+.google-btn img {
+  width: 7%;
+  margin-right: 5px;
+}
+
+
+.input-wrapper {
+  position: relative;
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.or-divider span {
+  padding: 0 12px;
+  font-weight: 500;
+}
+
+
+.eye-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+}
+
+.icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+}
+
+
+.login-text {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+Button {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.link-text {
+  color: var(--primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .signup-page {
+    padding: 16px;
+  }
+
+  .signup-card {
+    width: 100%;
+    padding: 24px;
+    border-radius: 16px;
+  }
+
+  .signup-title {
+    font-size: 20px;
+  }
+
+  .signup-subtitle {
+    font-size: 13px;
+  }
+
+  .signup-input {
+    font-size: 14px;
+  }
+
+  .google-btn,
+  .signup-btn {
+    font-size: 14px;
+  }
+
+  .terms-container {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .signup-page {
+    padding: 20px;
+  }
+
+  .signup-card {
+    width: 100%;
+    max-width: 420px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .signup-card {
+    width: 440px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .signup-card {
+    width: 450px;
+  }
+}

@@ -1,0 +1,120 @@
+:root {
+  /* Primary */
+  --primary: #DC2626;
+  --primary-hover: #B91C1C;
+  --primary-active: #991B1B;
+
+  --red-500: #EF4444;
+  --red-400: #F87171;
+  --red-300: #FCA5A5;
+  --red-200: #FECACA;
+  --red-100: #FEE2E2;
+  --red-50: #FEF2F2;
+
+  /* Text */
+  --text-main: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6B7280;
+  --text-light: #9CA3AF;
+
+  /* Background */
+  --bg-main: #FFFFFF;
+  --bg-soft: #FEF2F2;
+  --bg-card: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+
+  /* Border */
+  --border-light: #FECACA;
+  --border-soft: rgba(255, 255, 255, 0.5);
+
+
+  /* Button */
+  --btn-shadow-color: 220 38 38;
+  --btn-shadow-normal: 0 10px 15px -3px rgb(var(--btn-shadow-color) / 0.3),
+    0 4px 6px -4px rgb(var(--btn-shadow-color) / 0.3);
+  --btn-shadow-hover: 0 10px 15px -3px rgb(var(--btn-shadow-color) / 0.5),
+    0 4px 6px -4px rgb(var(--btn-shadow-color) / 0.5);
+
+    
+  /* Cursor */
+  --cursor-text: url("./assets/cursor-text.svg") 8 16, text;
+  --cursor-grab: url("./assets/cursor-grab.svg") 16 16, grab;
+  --cursor-normal: url("./assets/cursor-normal.svg") 0 0, auto;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  letter-spacing: 0.3px;
+  font-family: "Inter", sans-serif;
+}
+
+
+button {
+  border: none;
+  cursor: pointer;
+}
+
+
+
+/* ----- Button ----- */
+/* Primary Button */
+.primary-button {
+  background-color: var(--primary);
+  box-shadow: var(--btn-shadow-normal);
+  border-radius: 8px;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: var(--primary-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.primary-button:active {
+  background-color: var(--primary-active);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.primary-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Secondary Button */
+.secondary-button {
+  background-color: var(--red-100);
+  color: var(--primary);
+  border-radius: 8px;
+}
+
+.secondary-button:hover {
+  background-color: var(--red-200);
+  color: var(--primary);
+}
+
+.secondary-button:active {
+  background-color: var(--red-300);
+}
+
+
+
+
+/* Scroll Bar */
+/* ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--red-500);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+} */

@@ -1,0 +1,119 @@
+.workspace-topbar {
+     padding: 10px 40px;
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: space-between;
+     gap: 20px;
+     position: fixed;
+     top: 85px;
+     left: 48%;
+     transform: translateX(-50%);
+     z-index: 20;
+     border-radius: 12px;
+     background: #f3f4f685;
+     backdrop-filter: blur(20px);
+     transition: all 0.3s ease-in-out;
+     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.workspace-topbar-btns {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     gap: 20px;
+}
+
+.current-project {
+     font-weight: 550;
+     cursor: pointer;
+     transition: all 0.3s ease-in-out;
+}
+.current-project:hover {
+     color: var(--primary);
+     font-weight: 700;
+}
+.current-url {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 20px;
+     background-color: white;
+     padding: 10px 20px;
+     border-radius: 999px;
+     transition: all 0.3s ease-in-out;
+     border: 2px solid var(--primary);
+}
+.current-url svg {
+     cursor: pointer;
+     transition: all 0.3s ease-in-out;
+}
+.current-url svg:hover {
+     color: var(--primary);
+     transform: scale(1.1);
+}
+
+.save-btn p {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 10px;
+}
+
+
+@media (max-width: 1024px) {
+     .workspace-topbar {
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 10px 20px;
+          gap: 15px;
+     }
+
+     .workspace-topbar-btns {
+          gap: 15px;
+     }
+}
+
+
+@media (max-width: 768px) {
+     .workspace-topbar {
+          position: fixed;
+          top: 10px;
+          left: 10px;
+          right: 10px;
+          transform: none;
+          width: auto;
+          flex-direction: column;
+          align-items: stretch;
+          padding: 12px;
+          gap: 12px;
+     }
+
+     .workspace-topbar-screens,
+     .workspace-topbar-btns {
+          justify-content: center;
+          width: 100%;
+     }
+
+     .workspace-topbar-btns {
+          flex-wrap: wrap;
+     }
+
+     .divider-line {
+          display: none;
+     }
+}
+
+
+@media (max-width: 480px) {
+     .workspace-topbar-btns button {
+          width: 100%;
+          justify-content: center;
+     }
+
+     .workspace-topbar-screens {
+          justify-content: space-between;
+     }
+}

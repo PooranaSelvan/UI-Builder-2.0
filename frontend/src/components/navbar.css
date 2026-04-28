@@ -1,0 +1,223 @@
+.sirpam-logo {
+     height: 40px;
+}
+
+.navbar {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: space-evenly;
+     padding: 15px 30px;
+     background: var(--bg-glass);
+     backdrop-filter: blur(10px);
+     letter-spacing: 0.3px;
+     position: sticky;
+     top: 0;
+     border-bottom: 1px solid var(--red-200);
+     z-index: 1000;
+}
+.nav-logo {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     gap: 10px;
+}
+.nav-flex {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     gap: 20px;
+     position: relative;
+}
+
+li {
+     list-style: none;
+}
+
+a {
+     color: black;
+     text-decoration: none;
+}
+
+.sirpam-logo {
+     transition: all 0.3s ease-in-out;
+}
+
+.sirpam-logo:hover {
+     transform: scale(1.08) rotate(5deg);
+}
+
+.nav-heading {
+     font-size: 22px;
+     color: var(--primary);
+     font-weight: 700;
+}
+
+.navbar-navigations {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 30px;
+     font-size: 14px;
+}
+
+.nav-btns {
+     display: inline-block;
+}
+
+.nav-btns::after {
+     content: '';
+     width: 0px;
+     height: 2.2px;
+     display: block;
+     background: black;
+     transition: 500ms;
+     border-radius: 12px;
+     margin-top: 2px;
+}
+
+.nav-btns:hover::after {
+     width: 100%;
+}
+
+.nav-btn {
+     padding: 10px 20px;
+     font-size: 14px;
+     border-radius: 8px;
+     font-weight: 700;
+}
+
+.nav-btn-primary {
+     background-color: var(--red-100);
+     color: var(--primary);
+}
+
+.nav-btn-primary:hover {
+     background-color: var(--red-200);
+}
+
+.nav-btn-primary:active {
+     background-color: var(--red-300);
+}
+
+.mobile-menu {
+     position: absolute;
+     top: 70px;
+     left: 0;
+     width: 100%;
+     background: white;
+     border-top: 1px solid var(--red-200);
+     display: flex;
+     flex-direction: column;
+     gap: 20px;
+     padding: 30px 20px;
+     z-index: 1000;
+}
+
+.mobile-menu a {
+     font-size: 16px;
+     font-weight: 600;
+}
+
+.mobile-actions {
+     display: flex;
+     flex-direction: column;
+     gap: 15px;
+     margin-top: 10px;
+}
+
+.hamburger {
+     display: none;
+}
+
+
+/* Is Authenticated */
+.nav-btn-profile {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 10px;
+     color: var(--primary);
+     font-size: 16px;
+     background: var(--red-100);
+     padding: 8px 20px;
+     border-radius: 8px;
+     letter-spacing: 0.3px;
+}
+
+#nav-dropdown {
+     position: absolute;
+     top: 50px;
+     right: 0px;
+     z-index: 20;
+     animation: dropdownFade 0.2s ease-out forwards;
+}
+
+#nav-dropdown-wrapper {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     background-color: var(--red-100);
+     gap: 10px;
+     padding: 40px 30px;
+     border-radius: 12px;
+     position: relative;
+}
+#nav-dropdown button {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 10px;
+     padding: 10px 30px;
+     background: transparent;
+     background-color: var(--primary);
+     color: var(--red-100);
+     border-radius: 8px;
+}
+#nav-dropdown-close {
+     position: absolute;
+     top: 10px;
+     right: 10px;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Active State of NavLink */
+a.active:not(.nav-heading):not(.nav-btn) {
+     color: var(--primary);
+     font-weight: 700;
+     text-decoration: underline;
+     text-decoration-color: var(--primary);
+     text-underline-offset: 6px;
+     text-decoration-thickness: 2px;
+}
+
+@media screen and (max-width: 768px) {
+     .navbar {
+          justify-content: space-between;
+          padding: 15px 20px;
+     }
+
+     .desktop-navbar {
+          display: none;
+     }
+
+     .hamburger {
+          display: block;
+          cursor: pointer;
+          z-index: 1001;
+     }
+}
