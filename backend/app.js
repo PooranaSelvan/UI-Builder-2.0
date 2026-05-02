@@ -8,9 +8,11 @@ import cookieParser from "cookie-parser";
 import componentRoutes from "./routes/componentRoutes.js";
 import builderRoutes from "./routes/builderRoutes.js";
 import { getUserByEmail, getUserById } from "./utils/finders.js";
-import { signUpUserQuery, loginUserQuery } from "./utils/queries.js";
+import { signUpUserQuery, loginUserQuery, updateUserProfilePhoto } from "./utils/queries.js";
 import con from "./db/config.js";
 import templateRoutes from "./routes/templateRoutes.js";
+import { uploadToCloudinary } from "./utils/cloudinary.js";
+import { fetchZohoProfilePhoto } from "./utils/zohoPhoto.js";
 
 
 const PORT = process.env.PORT || 5000;
@@ -85,12 +87,24 @@ app.get("/auth/zoho/callback", async (req, res) => {
                }
           );
 
-
           if (profileRes.status === 200) {
                const zohoUser = profileRes.data;
                let user = await getUserByEmail(zohoUser.Email);
 
+               // Only fetch & upload profile photo if the user doesn't already have one
+               // This avoids creating duplicate Cloudinary images on every login
+               let profilePhotoUrl = null;
+               const needsPhoto = !user || !user.profilePhoto;
+
+               if (needsPhoto) {
+                    const avatarDataUri = await fetchZohoProfilePhoto(accessToken);
+                    if (avatarDataUri) {
+                         profilePhotoUrl = await uploadToCloudinary(avatarDataUri);
+                    }
+               }
+
                if (user === null || !user) {
+                    // New user — create account
                     con.query(signUpUserQuery, [zohoUser.Display_Name, zohoUser.Email, "", false], async (err, result) => {
                          if (err) {
                               if (err.code === "ER_DUP_ENTRY") {
@@ -101,11 +115,19 @@ app.get("/auth/zoho/callback", async (req, res) => {
                          }
 
                          let userId = result.insertId;
-                         let token = generateToken(userId);
 
+                         // Store Cloudinary photo URL for new user
+                         if (profilePhotoUrl) {
+                              con.query(updateUserProfilePhoto, [profilePhotoUrl, userId], (photoErr) => {
+                                   if (photoErr) console.log("Error saving profile photo:", photoErr.message);
+                              });
+                         }
+
+                         let token = generateToken(userId);
                          return res.redirect(`${siteUrl}?token=${token}`);
                     });
                } else {
+                    // Existing user — login
                     con.query(loginUserQuery, [zohoUser.Email], async (err, result) => {
                          if (err) {
                               console.log(err);
@@ -117,8 +139,15 @@ app.get("/auth/zoho/callback", async (req, res) => {
                          }
 
                          let user = result[0];
-                         let token = generateToken(user.userId);
 
+                         // Only update photo if the user didn't have one before
+                         if (profilePhotoUrl) {
+                              con.query(updateUserProfilePhoto, [profilePhotoUrl, user.userId], (photoErr) => {
+                                   if (photoErr) console.log("Error updating profile photo:", photoErr.message);
+                              });
+                         }
+
+                         let token = generateToken(user.userId);
                          return res.redirect(`${siteUrl}?token=${token}`);
                     });
                }
@@ -132,7 +161,7 @@ app.get("/auth/zoho/callback", async (req, res) => {
 });
 // Redirecting the User via that UI
 app.get("/auth/zoho/login", async (req, res) => {
-     let redirectUrl = `https://accounts.zoho.in/oauth/v2/auth?response_type=code&client_id=${process.env.ZOHO_CLIENT_ID}&scope=AaaServer.profile.Read&redirect_uri=${process.env.ZOHO_REDIRECT_URI}&access_type=offline`;
+     let redirectUrl = `https://accounts.zoho.in/oauth/v2/auth?response_type=code&client_id=${process.env.ZOHO_CLIENT_ID}&scope=AaaServer.profile.Read+ZohoContacts.userphoto.READ&redirect_uri=${process.env.ZOHO_REDIRECT_URI}&access_type=offline`;
      res.redirect(redirectUrl);
 });
 app.get("/auth/logout", async (req, res) => {

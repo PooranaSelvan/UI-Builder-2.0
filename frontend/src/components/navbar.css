@@ -132,56 +132,168 @@ a {
 }
 
 
-/* Is Authenticated */
-.nav-btn-profile {
+/* Profile trigger (avatar button in navbar) */
+.nav-profile-trigger {
      display: flex;
-     flex-wrap: wrap;
      align-items: center;
-     justify-content: center;
-     gap: 10px;
-     color: var(--primary);
-     font-size: 16px;
-     background: var(--red-100);
-     padding: 8px 20px;
-     border-radius: 8px;
-     letter-spacing: 0.3px;
+     gap: 6px;
+     cursor: pointer;
+     padding: 4px;
+     border-radius: 50px;
+     transition: background 0.2s ease;
 }
 
-#nav-dropdown {
+.nav-profile-trigger:hover {
+     background: var(--red-100);
+}
+
+/* Avatar in navbar */
+.nav-avatar-img {
+     width: 36px;
+     height: 36px;
+     border-radius: 50%;
+     object-fit: cover;
+     border: 2px solid var(--primary);
+     transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-profile-trigger:hover .nav-avatar-img {
+     transform: scale(1.05);
+     box-shadow: 0 0 0 3px var(--red-200);
+}
+
+.nav-avatar-letter {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     width: 36px;
+     height: 36px;
+     border-radius: 50%;
+     background-color: var(--primary);
+     color: white;
+     font-size: 15px;
+     font-weight: 700;
+     flex-shrink: 0;
+     transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-profile-trigger:hover .nav-avatar-letter {
+     transform: scale(1.05);
+     box-shadow: 0 0 0 3px var(--red-200);
+}
+
+.nav-chevron {
+     color: var(--primary);
+     transition: transform 0.2s ease;
+}
+
+.nav-chevron-open {
+     transform: rotate(180deg);
+}
+
+/* Dropdown card */
+.nav-dropdown-overlay {
      position: absolute;
      top: 50px;
-     right: 0px;
-     z-index: 20;
+     right: 0;
+     z-index: 100;
      animation: dropdownFade 0.2s ease-out forwards;
 }
 
-#nav-dropdown-wrapper {
-     display: flex;
-     flex-wrap: wrap;
-     align-items: center;
-     justify-content: center;
-     flex-direction: column;
-     background-color: var(--red-100);
-     gap: 10px;
-     padding: 40px 30px;
-     border-radius: 12px;
-     position: relative;
+.nav-dropdown-card {
+     background: white;
+     border: 1px solid var(--red-200);
+     border-radius: 14px;
+     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 2px 10px rgba(0, 0, 0, 0.05);
+     min-width: 240px;
+     overflow: hidden;
 }
-#nav-dropdown button {
+
+/* Dropdown header with avatar + info */
+.nav-dropdown-header {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     padding: 16px 18px;
+}
+
+.nav-dropdown-avatar {
+     width: 44px;
+     height: 44px;
+     border-radius: 50%;
+     object-fit: cover;
+     border: 2px solid var(--red-200);
+}
+
+.nav-dropdown-avatar-letter {
      display: flex;
      align-items: center;
      justify-content: center;
-     gap: 10px;
-     padding: 10px 30px;
-     background: transparent;
+     width: 44px;
+     height: 44px;
+     border-radius: 50%;
      background-color: var(--primary);
-     color: var(--red-100);
-     border-radius: 8px;
+     color: white;
+     font-size: 18px;
+     font-weight: 700;
+     flex-shrink: 0;
 }
-#nav-dropdown-close {
-     position: absolute;
-     top: 10px;
-     right: 10px;
+
+.nav-dropdown-info {
+     display: flex;
+     flex-direction: column;
+     gap: 2px;
+     overflow: hidden;
+}
+
+.nav-dropdown-name {
+     font-size: 14px;
+     font-weight: 600;
+     color: #1a1a1a;
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+}
+
+.nav-dropdown-email {
+     font-size: 12px;
+     color: #888;
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+}
+
+.nav-dropdown-divider {
+     height: 1px;
+     background: var(--red-200);
+     margin: 0;
+}
+
+/* Dropdown menu items */
+.nav-dropdown-item {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     width: 100%;
+     padding: 12px 18px;
+     border: none;
+     background: transparent;
+     cursor: pointer;
+     font-size: 14px;
+     font-weight: 500;
+     color: #333;
+     transition: background 0.15s ease, color 0.15s ease;
+     text-align: left;
+}
+
+.nav-dropdown-item:hover {
+     background: var(--red-100);
+     color: var(--primary);
+}
+
+.nav-dropdown-logout:hover {
+     background: #fff0f0;
+     color: #dc2626;
 }
 
 @keyframes dropdownFade {

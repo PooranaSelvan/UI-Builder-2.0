@@ -10,6 +10,10 @@ export const selectUserById = "SELECT * FROM users WHERE userId = ?";
 
 export const selectUserByEmail = "SELECT * FROM users where email = ?";
 
+export const updateUserProfilePhoto = "UPDATE users SET profilePhoto = ? WHERE userId = ?";
+
+export const removeUserProfilePhoto = "UPDATE users SET profilePhoto = NULL WHERE userId = ?";
+
 export const saveNewPageQuery = "INSERT INTO pages(projectId, pageName, description, data, isPublished, url, lastModified) values(?, ?, ?, ?, ?, ?, NOW())";
 
 export const saveNewComponent = "INSERT INTO components(userId, icon, componentName, data, lastModified) values(?, ?, ?, ?, ?)";

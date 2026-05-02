@@ -1,8 +1,8 @@
 import con from "../db/config.js";
 import validator from "validator";
-import { deleteAllProjectsQuery, deleteUserQuery, loginUserQuery, signUpUserQuery } from "../utils/queries.js";
+import { deleteAllProjectsQuery, deleteUserQuery, loginUserQuery, signUpUserQuery, updateUserProfilePhoto, removeUserProfilePhoto } from "../utils/queries.js";
 import { generateToken } from "../utils/generateToken.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { getUserById } from "../utils/finders.js";
 
 const registerUser = async (req, res) => {
@@ -112,4 +112,34 @@ const deleteUser = async (req, res) => {
 }
 
 
-export { registerUser, loginUser, deleteUser };
+const updateProfilePhoto = async (req, res) => {
+     const { profilePhoto } = req.body;
+
+     if (!profilePhoto) {
+          return res.status(400).json({ message: "Profile photo URL is required!" });
+     }
+
+     const userId = req.user.id;
+
+     con.query(updateUserProfilePhoto, [profilePhoto, userId], (err, result) => {
+          if (err) {
+               return res.status(500).json({ message: "Failed to update profile photo", err });
+          }
+
+          return res.status(200).json({ message: "Profile photo updated!", profilePhoto });
+     });
+}
+
+const removeProfilePhoto = async (req, res) => {
+     const userId = req.user.id;
+
+     con.query(removeUserProfilePhoto, [userId], (err, result) => {
+          if (err) {
+               return res.status(500).json({ message: "Failed to remove profile photo", err });
+          }
+
+          return res.status(200).json({ message: "Profile photo removed!" });
+     });
+}
+
+export { registerUser, loginUser, deleteUser, updateProfilePhoto, removeProfilePhoto };

@@ -3,7 +3,7 @@ import sirpamLogo from '../assets/sirpam-logo.png';
 import "./navbar.css";
 import Button from './Button';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, Settings, User, LogOut, CircleUserRound } from 'lucide-react';
+import { Menu, X, User, LogOut, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from "../utils/axios.js";
 
@@ -61,24 +61,41 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated, user }) => {
       <div className='nav-flex desktop-navbar'>
         {isAuthenticated ? (
           <>
-            <Button className='nav-btn-profile' onClick={(e) => { e.preventDefault(); setDropDown(!openDropDown) }}>
-              <CircleUserRound size={30} />
-              {user?.name.split(" ")[0]}
-            </Button>
-
-            <div id="nav-dropdown" style={{ display: openDropDown ? "flex" : "none", cursor: "pointer" }} ref={dropDownRef}>
-              <div id="nav-dropdown-wrapper">
-                <X id='nav-dropdown-close' onClick={() => setDropDown(!openDropDown)} />
-                <Button onClick={() => navigate("/profile")}>
-                  <User />
-                  Profile
-                </Button>
-                <Button onClick={logoutHandler}>
-                  <LogOut />
-                  Logout
-                </Button>
-              </div>
+            <div className="nav-profile-trigger" onClick={(e) => { e.preventDefault(); setDropDown(!openDropDown) }}>
+              {user?.profilePhoto ? (
+                <img src={user.profilePhoto} alt={user.name} className="nav-avatar-img" />
+              ) : (
+                <span className="nav-avatar-letter">{user?.name?.charAt(0).toUpperCase()}</span>
+              )}
+              <ChevronDown size={16} className={`nav-chevron ${openDropDown ? 'nav-chevron-open' : ''}`} />
             </div>
+
+            {openDropDown && (
+              <div className="nav-dropdown-overlay" ref={dropDownRef}>
+                <div className="nav-dropdown-card">
+                  <div className="nav-dropdown-header">
+                    {user?.profilePhoto ? (
+                      <img src={user.profilePhoto} alt={user.name} className="nav-dropdown-avatar" />
+                    ) : (
+                      <span className="nav-dropdown-avatar-letter">{user?.name?.charAt(0).toUpperCase()}</span>
+                    )}
+                    <div className="nav-dropdown-info">
+                      <span className="nav-dropdown-name">{user?.name}</span>
+                      <span className="nav-dropdown-email">{user?.email}</span>
+                    </div>
+                  </div>
+                  <div className="nav-dropdown-divider" />
+                  <button className="nav-dropdown-item" onClick={() => { navigate("/profile"); setDropDown(false); }}>
+                    <User size={18} />
+                    Profile
+                  </button>
+                  <button className="nav-dropdown-item nav-dropdown-logout" onClick={() => { logoutHandler(); setDropDown(false); }}>
+                    <LogOut size={18} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -104,24 +121,40 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated, user }) => {
 
           {isAuthenticated ? (
             <>
-              <Button className='nav-btn-profile' onClick={(e) => { e.preventDefault(); setDropDown(!openDropDown) }}>
-                <CircleUserRound size={30} />
-                {user?.name.split(" ")[0]}
-              </Button>
-
-              <div id="nav-dropdown" style={{ display: openDropDown ? "flex" : "none", cursor: "pointer" }} ref={dropDownRef}>
-                <div id="nav-dropdown-wrapper">
-                  <X id='nav-dropdown-close' onClick={() => setDropDown(!openDropDown)} />
-                  <Button onClick={() => navigate("/profile")}>
-                    <User />
-                    Profile
-                  </Button>
-                  <Button onClick={logoutHandler}>
-                    <LogOut />
-                    Logout
-                  </Button>
-                </div>
+              <div className="nav-profile-trigger" onClick={(e) => { e.preventDefault(); setDropDown(!openDropDown) }}>
+                {user?.profilePhoto ? (
+                  <img src={user.profilePhoto} alt={user.name} className="nav-avatar-img" />
+                ) : (
+                  <span className="nav-avatar-letter">{user?.name?.charAt(0).toUpperCase()}</span>
+                )}
               </div>
+
+              {openDropDown && (
+                <div className="nav-dropdown-overlay" ref={dropDownRef}>
+                  <div className="nav-dropdown-card">
+                    <div className="nav-dropdown-header">
+                      {user?.profilePhoto ? (
+                        <img src={user.profilePhoto} alt={user.name} className="nav-dropdown-avatar" />
+                      ) : (
+                        <span className="nav-dropdown-avatar-letter">{user?.name?.charAt(0).toUpperCase()}</span>
+                      )}
+                      <div className="nav-dropdown-info">
+                        <span className="nav-dropdown-name">{user?.name}</span>
+                        <span className="nav-dropdown-email">{user?.email}</span>
+                      </div>
+                    </div>
+                    <div className="nav-dropdown-divider" />
+                    <button className="nav-dropdown-item" onClick={() => { navigate("/profile"); setDropDown(false); setOpen(false); }}>
+                      <User size={18} />
+                      Profile
+                    </button>
+                    <button className="nav-dropdown-item nav-dropdown-logout" onClick={() => { logoutHandler(); setDropDown(false); setOpen(false); }}>
+                      <LogOut size={18} />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <div className="mobile-actions">
