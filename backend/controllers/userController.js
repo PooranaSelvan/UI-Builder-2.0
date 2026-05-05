@@ -1,6 +1,6 @@
 import con from "../db/config.js";
 import validator from "validator";
-import { deleteAllProjectsQuery, deleteUserQuery, loginUserQuery, signUpUserQuery, updateUserProfilePhoto, removeUserProfilePhoto } from "../utils/queries.js";
+import { deleteAllProjectsQuery, deleteUserQuery, loginUserQuery, signUpUserQuery, updateUserProfilePhoto, removeUserProfilePhoto, updateUserNameQuery, updateUserEmailQuery, selectUserByEmail } from "../utils/queries.js";
 import { generateToken } from "../utils/generateToken.js";
 import bcrypt from "bcryptjs";
 import { getUserById } from "../utils/finders.js";
@@ -142,4 +142,49 @@ const removeProfilePhoto = async (req, res) => {
      });
 }
 
-export { registerUser, loginUser, deleteUser, updateProfilePhoto, removeProfilePhoto };
+const updateUserName = async (req, res) => {
+     const { name } = req.body;
+     const userId = req.user.id;
+
+     if (!name || name.trim().length < 3) {
+          return res.status(400).json({ message: "Name must be at least 3 characters!" });
+     }
+
+     con.query(updateUserNameQuery, [name.trim(), userId], (err, result) => {
+          if (err) {
+               return res.status(500).json({ message: "Failed to update name", err });
+          }
+
+          return res.status(200).json({ message: "Name updated successfully!", name: name.trim() });
+     });
+};
+
+const updateUserEmail = async (req, res) => {
+     const { email } = req.body;
+     const userId = req.user.id;
+
+     if (!email || !validator.isEmail(email)) {
+          return res.status(400).json({ message: "Invalid email format!" });
+     }
+
+     // Check if email already exists
+     con.query(selectUserByEmail, [email], (err, result) => {
+          if (err) {
+               return res.status(500).json({ message: "Failed to update email", err });
+          }
+
+          if (result.length > 0 && result[0].userId !== userId) {
+               return res.status(409).json({ message: "Email already in use!" });
+          }
+
+          con.query(updateUserEmailQuery, [email, userId], (err2, result2) => {
+               if (err2) {
+                    return res.status(500).json({ message: "Failed to update email", err: err2 });
+               }
+
+               return res.status(200).json({ message: "Email updated successfully!", email });
+          });
+     });
+};
+
+export { registerUser, loginUser, deleteUser, updateProfilePhoto, removeProfilePhoto, updateUserName, updateUserEmail };

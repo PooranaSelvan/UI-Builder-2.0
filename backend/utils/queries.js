@@ -14,6 +14,10 @@ export const updateUserProfilePhoto = "UPDATE users SET profilePhoto = ? WHERE u
 
 export const removeUserProfilePhoto = "UPDATE users SET profilePhoto = NULL WHERE userId = ?";
 
+export const updateUserNameQuery = "UPDATE users SET name = ? WHERE userId = ?";
+
+export const updateUserEmailQuery = "UPDATE users SET email = ? WHERE userId = ?";
+
 export const saveNewPageQuery = "INSERT INTO pages(projectId, pageName, description, data, isPublished, url, lastModified) values(?, ?, ?, ?, ?, ?, NOW())";
 
 export const saveNewComponent = "INSERT INTO components(userId, icon, componentName, data, lastModified) values(?, ?, ?, ?, ?)";

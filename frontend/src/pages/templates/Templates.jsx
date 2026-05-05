@@ -42,8 +42,9 @@ const Templates = () => {
   return (
     <>
       <div className='template-wrapper'>
-        <div className="template-header">
+        <div className="template-hero">
           <h1>Choose a template to <span>Start Building</span></h1>
+          <p className="template-subtitle">Kickstart your next project with professionally designed templates. Customize everything to match your vision.</p>
         </div>
         <div className="template-container">
           {
@@ -52,7 +53,6 @@ const Templates = () => {
             ))
           }
         </div>
-        <p>More Templates Coming Soon. Stay Tuned..</p>
       </div>
       <Footer />
     </>

@@ -309,6 +309,100 @@
     border: none;
 }
 
+/* Editable field wrapper */
+.profile-editable-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3%;
+}
+
+.profile-editable-field > input,
+.profile-editable-field > .mail {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.profile-editable-field > input {
+    width: 100%;
+    padding: 2%;
+    border-radius: 25px;
+    background-color: #FEF8F8;
+    border: 1px solid #FEE2E2;
+    outline: none;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+.profile-edit-input {
+    border: 1.5px solid var(--primary) !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Edit action buttons */
+.profile-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.profile-edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.profile-pencil-btn {
+    color: #888;
+}
+
+.profile-pencil-btn:hover {
+    background: var(--red-100);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.profile-save-btn {
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+.profile-save-btn:hover {
+    background: #f0fdf4;
+    border-color: #16a34a;
+}
+
+.profile-save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.profile-cancel-btn {
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.profile-cancel-btn:hover {
+    background: #fff0f0;
+    border-color: #dc2626;
+}
+
+.profile-cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .profile-form .hr {
     width: 100%;
     height: 1px;

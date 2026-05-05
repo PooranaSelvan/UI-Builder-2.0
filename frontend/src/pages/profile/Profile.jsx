@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './profile.css'
-import { User, TriangleAlert, Camera, Trash2, X } from 'lucide-react';
+import { User, TriangleAlert, Camera, Trash2, X, Pencil, Check } from 'lucide-react';
 import Button from '../../components/Button';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -16,14 +16,30 @@ const Profile = ({ setIsAuthenticated }) => {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Editing states
+  const [editingName, setEditingName] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+  const [emailValue, setEmailValue] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [savingEmail, setSavingEmail] = useState(false);
+
+  const nameInputRef = useRef(null);
+  const emailInputRef = useRef(null);
+
+  // Check if user is from zohocorp
+  const isZohocorpUser = user?.email?.endsWith("@zohocorp.com");
+
   useEffect(() => {
-    async function fetchUser(params) {
+    async function fetchUser() {
       setLoading(true);
       try {
         let res = await api.get(`/checkme`);
 
         if (res.data?.user) {
           setUser(res.data.user);
+          setNameValue(res.data.user.name || "");
+          setEmailValue(res.data.user.email || "");
         }
         setLoading(false);
       } catch (error) {
@@ -42,6 +58,97 @@ const Profile = ({ setIsAuthenticated }) => {
 
     fetchUser();
   }, []);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (editingName && nameInputRef.current) {
+      nameInputRef.current.focus();
+      nameInputRef.current.select();
+    }
+  }, [editingName]);
+
+  useEffect(() => {
+    if (editingEmail && emailInputRef.current) {
+      emailInputRef.current.focus();
+      emailInputRef.current.select();
+    }
+  }, [editingEmail]);
+
+  // Save name
+  const handleSaveName = async () => {
+    const trimmed = nameValue.trim();
+    if (trimmed.length < 3) {
+      toast.error("Name must be at least 3 characters!");
+      return;
+    }
+    if (trimmed === user?.name) {
+      setEditingName(false);
+      return;
+    }
+
+    setSavingName(true);
+    try {
+      const res = await api.put("/users/update-name", { name: trimmed });
+      setUser((prev) => ({ ...prev, name: res.data.name }));
+      setNameValue(res.data.name);
+      toast.success("Name updated successfully!");
+      setEditingName(false);
+    } catch (err) {
+      console.log(err);
+      toast.error(err.response?.data?.message || "Failed to update name");
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  // Save email
+  const handleSaveEmail = async () => {
+    const trimmed = emailValue.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Please enter a valid email!");
+      return;
+    }
+    if (trimmed === user?.email) {
+      setEditingEmail(false);
+      return;
+    }
+
+    setSavingEmail(true);
+    try {
+      const res = await api.put("/users/update-email", { email: trimmed });
+      setUser((prev) => ({ ...prev, email: res.data.email }));
+      setEmailValue(res.data.email);
+      toast.success("Email updated successfully!");
+      setEditingEmail(false);
+    } catch (err) {
+      console.log(err);
+      toast.error(err.response?.data?.message || "Failed to update email");
+    } finally {
+      setSavingEmail(false);
+    }
+  };
+
+  // Cancel editing
+  const handleCancelName = () => {
+    setNameValue(user?.name || "");
+    setEditingName(false);
+  };
+
+  const handleCancelEmail = () => {
+    setEmailValue(user?.email || "");
+    setEditingEmail(false);
+  };
+
+  // Handle Enter/Escape key
+  const handleNameKeyDown = (e) => {
+    if (e.key === "Enter") handleSaveName();
+    if (e.key === "Escape") handleCancelName();
+  };
+
+  const handleEmailKeyDown = (e) => {
+    if (e.key === "Enter") handleSaveEmail();
+    if (e.key === "Escape") handleCancelEmail();
+  };
 
   // Upload profile photo to Cloudinary and save URL to backend
   const handlePhotoUpload = async (e) => {
@@ -202,12 +309,106 @@ const Profile = ({ setIsAuthenticated }) => {
               Personal Details
             </h2>
             <div className="profile-form">
-              <label htmlFor="">Name</label>
-              <input type="text" readOnly value={user?.name || "NaN"} />
-              <label htmlFor="">Email</label>
-              <div className='mail'>
-                <input id='personal-mail' type="email" readOnly value={user?.email || "NaN"} />
+              {/* Name Field */}
+              <label>Name</label>
+              <div className="profile-editable-field">
+                {editingName ? (
+                  <>
+                    <input
+                      ref={nameInputRef}
+                      type="text"
+                      value={nameValue}
+                      onChange={(e) => setNameValue(e.target.value)}
+                      onKeyDown={handleNameKeyDown}
+                      className="profile-edit-input"
+                      disabled={savingName}
+                    />
+                    <div className="profile-edit-actions">
+                      <button
+                        className="profile-edit-btn profile-save-btn"
+                        onClick={handleSaveName}
+                        disabled={savingName}
+                        title="Save"
+                      >
+                        <Check size={15} />
+                      </button>
+                      <button
+                        className="profile-edit-btn profile-cancel-btn"
+                        onClick={handleCancelName}
+                        disabled={savingName}
+                        title="Cancel"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input type="text" readOnly value={user?.name || "NaN"} />
+                    <button
+                      className="profile-edit-btn profile-pencil-btn"
+                      onClick={() => setEditingName(true)}
+                      title="Edit name"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                  </>
+                )}
               </div>
+
+              {/* Email Field */}
+              <label>Email</label>
+              <div className="profile-editable-field">
+                {editingEmail ? (
+                  <>
+                    <div className="mail">
+                      <input
+                        ref={emailInputRef}
+                        id="personal-mail"
+                        type="email"
+                        value={emailValue}
+                        onChange={(e) => setEmailValue(e.target.value)}
+                        onKeyDown={handleEmailKeyDown}
+                        disabled={savingEmail}
+                      />
+                    </div>
+                    <div className="profile-edit-actions">
+                      <button
+                        className="profile-edit-btn profile-save-btn"
+                        onClick={handleSaveEmail}
+                        disabled={savingEmail}
+                        title="Save"
+                      >
+                        <Check size={15} />
+                      </button>
+                      <button
+                        className="profile-edit-btn profile-cancel-btn"
+                        onClick={handleCancelEmail}
+                        disabled={savingEmail}
+                        title="Cancel"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="mail">
+                      <input id="personal-mail" type="email" readOnly value={user?.email || "NaN"} />
+                    </div>
+                    {!isZohocorpUser && (
+                      <button
+                        className="profile-edit-btn profile-pencil-btn"
+                        onClick={() => setEditingEmail(true)}
+                        title="Edit email"
+                      >
+                        <Pencil size={15} />
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+
               <div className='hr'></div>
               <div className="delete-account">
                 <div className="delete-account-wrapper">
