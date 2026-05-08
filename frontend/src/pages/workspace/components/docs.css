@@ -1,6 +1,6 @@
 .dock-wrapper {
      display: flex;
-     flex-wrap: wrap;
+     flex-wrap: nowrap;
      align-items: center;
      justify-content: center;
      gap: 14px;
@@ -15,13 +15,13 @@
      backdrop-filter: blur(20px);
      transition: all 0.3s ease-in-out;
      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+     z-index: 30;
 }
 
 .dock-wrapper:hover {
      transform: translateX(-50%) translateY(-4px);
      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-
 
 
 /* Icon */
@@ -31,6 +31,7 @@
      cursor: pointer;
      color: black;
      transition: all 0.2s ease;
+     flex-shrink: 0;
 }
 
 .dock-wrapper svg:hover {
@@ -51,11 +52,12 @@
      font-weight: 500;
      font-size: 14px;
      border-radius: 10px;
-     color: #111827;
+     color: #374151;
      border: 1px solid #F3F4F6;
      transition: all 0.3s ease-in-out;
      border: 2px solid transparent;
      outline: none;
+     flex-shrink: 0;
 }
 
 .dock-wrapper > input:hover {
@@ -68,4 +70,62 @@
   width: 1px;
   height: 20px;
   background-color: #ccc;
+  flex-shrink: 0;
+}
+
+
+/* ── Dock Responsive ── */
+@media (max-width: 768px) {
+     .dock-wrapper {
+          bottom: 16px;
+          left: 16px;
+          right: 16px;
+          transform: none;
+          padding: 10px 18px;
+          gap: 10px;
+          border-radius: 14px;
+          width: auto;
+          justify-content: center;
+     }
+
+     .dock-wrapper:hover {
+          transform: translateY(-2px);
+     }
+
+     .dock-wrapper svg {
+          width: 18px;
+          height: 18px;
+     }
+
+     .dock-wrapper > input {
+          height: 28px;
+          width: 58px;
+          font-size: 12px;
+     }
+}
+
+@media (max-width: 480px) {
+     .dock-wrapper {
+          bottom: 10px;
+          left: 10px;
+          right: 10px;
+          padding: 8px 14px;
+          gap: 8px;
+     }
+
+     .dock-wrapper svg {
+          width: 16px;
+          height: 16px;
+     }
+
+     .dock-wrapper > input {
+          height: 26px;
+          width: 50px;
+          font-size: 11px;
+          border-radius: 8px;
+     }
+
+     .divider-line {
+          height: 16px;
+     }
 }

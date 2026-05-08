@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FolderCard from "./FolderCard";
 import CreateForm from "./CreateForm";
-import { Plus, MoreVertical, FileText, Search, ChevronRight, Copy, Edit3, Eye, Trash2, Rocket, Undo2, Download, FileUp, CodeXml, Braces, Component } from "lucide-react";
+import { Plus, MoreVertical, FileText, Search, ChevronRight, Copy, Edit3, Eye, Trash2, Rocket, Undo2, Download, FileUp, CodeXml, Braces, Component, Settings } from "lucide-react";
 import "./Dashboard.css";
 import toast from "react-hot-toast";
 import Loading from "../../components/Loading";
@@ -738,6 +738,12 @@ const Dashboard = () => {
                               <Download size={16} />
                               Export
                             </button>
+                          </div>
+                          <div className="menu-item">
+                            <Button onClick={(e) => { e.stopPropagation(); navigate(`/page-settings/${page.id}`); }} style={{ width: "100%", borderRadius: "5px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px", backgroundColor: "transparent" }}>
+                              <Settings size={16} />
+                              Settings
+                            </Button>
                           </div>
                           <div className="menu-divider" />
                           <div className="menu-item delete">

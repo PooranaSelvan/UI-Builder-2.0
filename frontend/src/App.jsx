@@ -19,6 +19,7 @@ import Profile from "./pages/profile/Profile.jsx";
 import Publish from "./pages/publish/Publish.jsx";
 import api from "./utils/axios.js";
 import TemplatePreview from './pages/templates/TemplatePreview.jsx';
+import PageSettings from './pages/page-settings/PageSettings.jsx';
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import { dashBoardTour, editorTour, homeTour, workspaceTour } from './driverjs/tour.js';
 
@@ -102,6 +103,7 @@ function App() {
           <Route path='/features' element={<Features isAuthenticated={isAuthenticated} />} />
           <Route path='/templates' element={<Templates />} />
           <Route path="/workspace/:pageId" element={<Workspace isAuthenticated={isAuthenticated} />} />
+          <Route path="/page-settings/:pageId" element={<PageSettings />} />
           <Route path="/preview" element={<PreviewCanvas />} />
           <Route path="/component-editor" element={<ComponentEditor />} />
           <Route path="/component-editor-preview" element={<ComponentEditorPreview />} />

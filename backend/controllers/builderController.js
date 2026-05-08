@@ -1,6 +1,6 @@
 import con from "../db/config.js";
 import { getProjectById, getUserById } from "../utils/finders.js";
-import { checkPageUrlQuery, deleteAllCustomComponentsQuery, deleteCustomComponentQuery, deletePageQuery, deleteProjectQuery, getPageByPageIdQuery, getPublishedPageQuery, publishPageQuery, renamePageQuery, saveNewComponent, saveNewPageQuery, saveNewProject, selectProjectByUserId, unPublishPageQuery, updatePageData } from "../utils/queries.js";
+import { checkPageUrlQuery, deleteAllCustomComponentsQuery, deleteCustomComponentQuery, deletePageQuery, deleteProjectQuery, getPageByPageIdQuery, getPublishedPageQuery, publishPageQuery, renamePageQuery, saveNewComponent, saveNewPageQuery, saveNewProject, selectProjectByUserId, unPublishPageQuery, updatePageData, updatePageMetaQuery } from "../utils/queries.js";
 import { getUserComponentsQuery } from "../utils/queries.js";
 import { getUserPagesQuery } from "../utils/queries.js";
 
@@ -163,11 +163,17 @@ const getPageByPageId = async (req, res) => {
 
           return res.status(200).json({
                id: page.pageId,
+               pageId: page.pageId,
                projectId: page.projectId,
+               pageName: page.pageName,
                name: page.pageName,
                description: page.description,
                data: page.data || [],
                pageUrl: page.url,
+               url: page.url,
+               favicon: page.favicon || null,
+               title: page.title || null,
+               meta: page.meta || null,
                lastModified: page.lastModified,
                isPublished: page.isPublished,
                userId: page.userId
@@ -201,6 +207,9 @@ const getPublishedPage = async (req, res) => {
                description: page.description,
                pageUrl: page.url,
                data: page.data || [],
+               favicon: page.favicon || null,
+               title: page.title || null,
+               meta: page.meta || null,
                lastModified: page.lastModified,
                isPublished: page.isPublished
           });
@@ -305,6 +314,26 @@ const renamePage = async (req, res) => {
           }
 
           return res.status(200).json({ message: "Page Renamed Successfully" });
+     });
+}
+
+const updatePageMeta = async (req, res) => {
+     const { pageId, favicon, title, meta } = req.body;
+
+     if (!pageId) {
+          return res.status(400).json({ message: "Page ID is required!" });
+     }
+
+     con.query(updatePageMetaQuery, [favicon || null, title || null, meta || null, pageId], (err, result) => {
+          if (err) {
+               return res.status(500).json({ message: err?.sqlMessage, error: err });
+          }
+
+          if (result.affectedRows === 0) {
+               return res.status(404).json({ message: "Page not found!" });
+          }
+
+          return res.status(200).json({ message: "Page meta updated successfully!" });
      });
 }
 
@@ -507,4 +536,4 @@ const updateCustomComponent = async (req, res) => {
 };
 
 
-export { getProjects, saveProject, deleteProject, getPages, getPageByPageId, getPublishedPage, checkPageUrl, savePage, renamePage, updatePage, publishPage, unPublishPage, deletePage, getCustomComponents, saveCustomComponent, deleteCustomComponent, deleteAllCustomComponent, updateCustomComponent };
+export { getProjects, saveProject, deleteProject, getPages, getPageByPageId, getPublishedPage, checkPageUrl, savePage, renamePage, updatePage, updatePageMeta, publishPage, unPublishPage, deletePage, getCustomComponents, saveCustomComponent, deleteCustomComponent, deleteAllCustomComponent, updateCustomComponent };

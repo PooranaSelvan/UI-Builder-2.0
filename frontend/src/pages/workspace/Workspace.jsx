@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext, useRef, useCallback } from "react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import LeftPanel from "./LeftSideBar/LeftPanel";
@@ -11,7 +11,7 @@ import { components as componentLibrary } from "./utils/ComponentsData.js";
 import { CustomComponentsContext } from "../../context/CustomComponentsContext";
 import "./workspace.css";
 import Button from "../../components/Button.jsx";
-import { Eye, Rocket, Save, Undo2, AlertCircle, Trash2, ExternalLink, Cloudy } from 'lucide-react';
+import { Eye, Rocket, Save, Undo2, AlertCircle, Trash2, ExternalLink, Cloudy, Settings } from 'lucide-react';
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../utils/axios.js";
 import Loading from "../../components/Loading.jsx";
@@ -29,6 +29,7 @@ const Workspace = ({ isAuthenticated }) => {
   const [pageSaving, setPageSaving] = useState(false);
   let navigate = useNavigate();
   const [deleteTargetId, setDeleteTargetId] = useState(null);
+  const pageMetaRef = useRef(null);
 
 
   useEffect(() => {
@@ -66,7 +67,13 @@ const Workspace = ({ isAuthenticated }) => {
         }
 
         setPage(res.data);
-        setComponents(res.data.data || []);
+
+        // Separate __pageMeta__ from canvas components
+        const rawData = res.data.data || [];
+        const metaObj = rawData.find(item => item.id === "__pageMeta__");
+        const canvasComponents = rawData.filter(item => item.id !== "__pageMeta__");
+        pageMetaRef.current = metaObj || null;
+        setComponents(canvasComponents);
       } catch (error) {
         console.log(error.response);
 
@@ -83,6 +90,12 @@ const Workspace = ({ isAuthenticated }) => {
   }, [pageId, user]);
 
 
+  // Build full data array with meta included
+  const getFullData = useCallback(() => {
+    const meta = pageMetaRef.current;
+    return meta ? [meta, ...components] : [...components];
+  }, [components]);
+
   const handleSavePage = async () => {
     if (!isAuthenticated) {
       toast.error("Login to Save Page!");
@@ -91,14 +104,15 @@ const Workspace = ({ isAuthenticated }) => {
 
     try {
       setPageSaving(true);
+      const fullData = getFullData();
       let res = await api.put(`/builder/pages/${pageId}`, {
-        data: components
+        data: fullData
       });
 
-      let updatedPage = { ...page, data: components };
+      let updatedPage = { ...page, data: fullData };
 
-      setPage(ele => ({ ...ele, data: components }));
-      localStorage.setItem("previewComponents", JSON.stringify(components));
+      setPage(ele => ({ ...ele, data: fullData }));
+      localStorage.setItem("previewComponents", JSON.stringify(fullData));
       toast.success("Pages Saved Successfully!");
 
       return updatedPage;
@@ -114,14 +128,15 @@ const Workspace = ({ isAuthenticated }) => {
     let timer = setTimeout(async () => {
       try {
         setPageSaving(true);
+        const fullData = getFullData();
         let res = await api.put(`/builder/pages/${pageId}`, {
-          data: components
+          data: fullData
         });
 
-        let updatedPage = { ...page, data: components };
+        let updatedPage = { ...page, data: fullData };
 
-        setPage(ele => ({ ...ele, data: components }));
-        localStorage.setItem("previewComponents", JSON.stringify(components));
+        setPage(ele => ({ ...ele, data: fullData }));
+        localStorage.setItem("previewComponents", JSON.stringify(fullData));
         
       } catch (error) {
         console.log(error.response);
@@ -507,7 +522,7 @@ const Workspace = ({ isAuthenticated }) => {
       return;
     }
 
-    localStorage.setItem("previewComponents", JSON.stringify(components));
+    localStorage.setItem("previewComponents", JSON.stringify(getFullData()));
     window.open("/preview", "_blank");
   }
 
@@ -591,6 +606,9 @@ const Workspace = ({ isAuthenticated }) => {
                 </div>
                 <ExternalLink size={20} onClick={openPublish} />
               </div>
+              <Button className="secondary-button" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px" }} onClick={() => navigate(`/page-settings/${pageId}`)} title="Page Settings">
+                <Settings size={20} />
+              </Button>
               {page?.isPublished ? (
                 <Button className="primary-button" style={{ display: "flex", alignItems: "center", justifyCenter: "center", gap: "10px", padding: "10px 20px" }} onClick={handleUnPublishPage}>
                   <Undo2 size={20} />

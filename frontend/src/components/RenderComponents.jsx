@@ -1,9 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { VOID_TAGS } from "../pages/workspace/utils/voidTags";
 import { kebabCase } from "change-case";
 
 const RenderComponents = ({ children }) => {
      const [hiddenIds, setHiddenIds] = useState({});
+
+     // Extract and apply __pageMeta__ from the children array
+     useEffect(() => {
+          const metaObj = children?.find(item => item.id === "__pageMeta__");
+          if (!metaObj) return;
+
+          // Set page title
+          if (metaObj.title) {
+               document.title = metaObj.title;
+          }
+
+          // Set favicon
+          if (metaObj.favicon) {
+               let existingFavicon = document.querySelector("link[rel='icon']");
+               if (existingFavicon) {
+                    existingFavicon.href = metaObj.favicon;
+               } else {
+                    const link = document.createElement("link");
+                    link.rel = "icon";
+                    link.href = metaObj.favicon;
+                    document.head.appendChild(link);
+               }
+          }
+
+          // Set meta description
+          if (metaObj.meta) {
+               let existingMeta = document.querySelector("meta[name='description']");
+               if (existingMeta) {
+                    existingMeta.content = metaObj.meta;
+               } else {
+                    const metaTag = document.createElement("meta");
+                    metaTag.name = "description";
+                    metaTag.content = metaObj.meta;
+                    document.head.appendChild(metaTag);
+               }
+          }
+     }, [children]);
      const [dynamicText, setDynamicText] = useState({});
      const [hoveredIds, setHoveredIds] = useState({});
 
@@ -203,7 +240,10 @@ const RenderComponents = ({ children }) => {
           return ele;
      };
 
-     return <>{renderElements(children)}</>;
+     // Filter out __pageMeta__ before rendering
+     const renderableChildren = children?.filter(item => item.id !== "__pageMeta__") || [];
+
+     return <>{renderElements(renderableChildren)}</>;
 };
 
 export default RenderComponents;

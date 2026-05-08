@@ -26,7 +26,7 @@ export const saveNewProject = "INSERT INTO projects(userId, projectName, descrip
 
 export const selectProjectByUserId = "SELECT * FROM projects where userId = ?";
 
-export const getUserPagesQuery = `SELECT  projects.projectId, projects.userId, projects.projectName, projects.description, projects.isPublished, pages.pageId, pages.pageName, pages.description AS pageDescription, pages.data AS pageData, pages.lastModified, pages.isPublished AS pagePublished, pages.url FROM projects LEFT JOIN pages ON projects.projectId = pages.projectId WHERE projects.userId = ?;`;
+export const getUserPagesQuery = `SELECT  projects.projectId, projects.userId, projects.projectName, projects.description, projects.isPublished, pages.pageId, pages.pageName, pages.description AS pageDescription, pages.data AS pageData, pages.lastModified, pages.isPublished AS pagePublished, pages.url, pages.favicon, pages.title, pages.meta FROM projects LEFT JOIN pages ON projects.projectId = pages.projectId WHERE projects.userId = ?;`;
 
 export const getUserComponentsQuery = "SELECT * FROM components WHERE userId = ?";
 
@@ -40,7 +40,7 @@ export const deleteAllCustomComponentsQuery = "DELETE FROM components WHERE user
 
 export const updatePageData = "UPDATE pages SET data = ?, lastModified = NOW() WHERE pageId = ?";
 
-export const getPageByPageIdQuery = "SELECT p.pageId, p.projectId, p.pageName, p.description, p.url, p.data, p.lastModified, p.isPublished, pr.userId FROM pages p JOIN projects pr ON p.projectId = pr.projectId WHERE p.pageId = ?";
+export const getPageByPageIdQuery = "SELECT p.pageId, p.projectId, p.pageName, p.description, p.url, p.favicon, p.title, p.meta, p.data, p.lastModified, p.isPublished, pr.userId FROM pages p JOIN projects pr ON p.projectId = pr.projectId WHERE p.pageId = ?";
 
 export const deleteUserQuery = "DELETE FROM users where userId = ?";
 
@@ -55,6 +55,8 @@ export const checkPageUrlQuery = "SELECT * FROM pages WHERE url = ?";
 export const deleteAllProjectsQuery = "DELETE FROM projects WHERE userId = ?";
 
 export const renamePageQuery = "UPDATE pages SET pageName = ?, description = ?, url = ? WHERE pageId = ?";
+
+export const updatePageMetaQuery = "UPDATE pages SET favicon = ?, title = ?, meta = ? WHERE pageId = ?";
 
 export const getAllTemplatesQuery = "SELECT * FROM templates";
 

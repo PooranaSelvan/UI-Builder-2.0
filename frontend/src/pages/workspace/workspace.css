@@ -72,7 +72,7 @@
      }
 
      .workspace-topbar-btns {
-          gap: 15px;
+          gap: 12px;
      }
 }
 
@@ -80,15 +80,16 @@
 @media (max-width: 768px) {
      .workspace-topbar {
           position: fixed;
-          top: 10px;
+          top: 70px;
           left: 10px;
           right: 10px;
           transform: none;
           width: auto;
           flex-direction: column;
           align-items: stretch;
-          padding: 12px;
-          gap: 12px;
+          padding: 10px 12px;
+          gap: 10px;
+          border-radius: 14px;
      }
 
      .workspace-topbar-screens,
@@ -99,6 +100,34 @@
 
      .workspace-topbar-btns {
           flex-wrap: wrap;
+          gap: 8px;
+          justify-content: center;
+     }
+
+     .workspace-topbar-btns button {
+          padding: 8px 14px !important;
+          font-size: 13px;
+     }
+
+     .workspace-topbar-btns .save-btn p,
+     .workspace-topbar-btns button p {
+          gap: 6px !important;
+          font-size: 13px;
+     }
+
+     .current-url {
+          padding: 8px 14px;
+          gap: 10px;
+          font-size: 13px;
+          flex-wrap: nowrap;
+          overflow: hidden;
+     }
+
+     .current-url p {
+          font-size: 13px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
      }
 
      .divider-line {
@@ -108,9 +137,48 @@
 
 
 @media (max-width: 480px) {
+     .workspace-topbar {
+          top: 65px;
+          left: 6px;
+          right: 6px;
+          padding: 8px 10px;
+          gap: 8px;
+     }
+
+     .workspace-topbar-btns {
+          gap: 6px;
+     }
+
      .workspace-topbar-btns button {
-          width: 100%;
+          padding: 7px 10px !important;
+          font-size: 12px;
+          flex: 1;
+          min-width: 0;
           justify-content: center;
+     }
+
+     .workspace-topbar-btns .save-btn p,
+     .workspace-topbar-btns button p {
+          gap: 4px !important;
+          font-size: 12px;
+     }
+
+     .workspace-topbar-btns button svg {
+          width: 16px;
+          height: 16px;
+          flex-shrink: 0;
+     }
+
+     .current-url {
+          padding: 6px 10px;
+          gap: 8px;
+          font-size: 12px;
+     }
+
+     .current-url svg {
+          width: 16px;
+          height: 16px;
+          flex-shrink: 0;
      }
 
      .workspace-topbar-screens {
