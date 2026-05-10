@@ -1097,3 +1097,150 @@
         transform: rotate(360deg);
     }
 }
+
+/* ========== Table Editor Styles ========== */
+
+.table-editor {
+    width: 100%;
+    margin-bottom: 5%;
+}
+
+.table-editor-info {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.table-editor-info span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    background: #f3f4f6;
+    padding: 4px 14px;
+    border-radius: 6px;
+}
+
+.table-editor-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.table-editor-control-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.table-editor-control-group label {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: gray;
+}
+
+.table-editor-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-editor-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.table-editor-btn:hover:not(:disabled) {
+    background: var(--red-50);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.table-editor-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.table-editor-count {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Table Editor Cells */
+
+.table-editor-cells {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.table-editor-cell-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-editor-cell-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: gray;
+    min-width: 36px;
+    text-transform: uppercase;
+}
+
+.table-editor-cell-row input {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.table-editor-cell-row input:focus {
+    border-color: var(--primary);
+}
+
+/* Table Editor Row Groups (Body Cells) */
+
+.table-editor-row-group {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.table-editor-row-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.table-editor-row-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.table-editor-row-cells {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}

@@ -124,6 +124,7 @@ const Workspace = ({ isAuthenticated }) => {
   }
 
 
+  // Auto Save
   useEffect(() => {
     let timer = setTimeout(async () => {
       try {
@@ -137,7 +138,6 @@ const Workspace = ({ isAuthenticated }) => {
 
         setPage(ele => ({ ...ele, data: fullData }));
         localStorage.setItem("previewComponents", JSON.stringify(fullData));
-        
       } catch (error) {
         console.log(error.response);
         toast.error("Auto Saving Failed! Please Save Manually!", {...toastErrorStyle, id : "auto-save"});

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import "./RightSideBar.css";
 import "../../../index.css"
-import { ListPlus, MonitorSmartphone, Settings } from 'lucide-react';
+import { ListPlus, MonitorSmartphone, Settings, Table2, Plus, Minus, Rows3 } from 'lucide-react';
 import { v4 as uuidv4 } from "uuid";
 import { ChevronDown } from 'lucide-react';
 import { ChevronUp } from 'lucide-react';
@@ -28,6 +28,7 @@ import { EditorView } from '@uiw/react-codemirror';
 import { EditorState } from '@uiw/react-codemirror';
 import tinycolor from 'tinycolor2'
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 
 /*Used in the rendering of the select tag in the units for height, width */
 const UNITS = ["px", "%", "rem", "em", "auto"];
@@ -43,6 +44,7 @@ const EVENT_MAP = {
     input: ["visibility", "style", "onchange", "onfocus", "onblur"],
     textarea: ["visibility", "style"],
     select: ["visibility", "style"],
+    table: ["visibility", "style"],
 };
 
 const COMPONENT_PROPS_MAP = {
@@ -88,7 +90,7 @@ const COMPONENT_PROPS_MAP = {
 
 const DEFAULT_KEYS = ["Enter", "Escape", "Tab", "Backspace", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "Delete"];
 
-const FILE_IMPORT_TAGS = ["p", "h1", "h2", "h3", "h4", "h5", "h6"];
+const FILE_IMPORT_TAGS = ["p", "h1", "h2", "h3", "h4", "h5", "h6", "table"];
 
 const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) => {
     const [activeTab, setActiveTab] = useState("properties");
@@ -215,11 +217,147 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
         setEventType(firstEvent || "");
     }, [selectedComponent?.id, selectedComponent?.defaultProps?.events]);
 
+    /* Parse spreadsheet data (2D array) into table children structure */
+    const buildTableFromData = (data) => {
+        if (!data || data.length === 0) return;
+
+        const defaultCellStyle = {
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "#ddd",
+            paddingTop: "10px",
+            paddingBottom: "10px",
+            paddingLeft: "12px",
+            paddingRight: "12px"
+        };
+
+        const defaultHeaderStyle = {
+            ...defaultCellStyle,
+            backgroundColor: "#4aa500",
+            color: "#ffffff",
+            textAlign: "left",
+            fontWeight: "600"
+        };
+
+        const headers = data[0] || [];
+        const bodyData = data.slice(1);
+
+        // Build thead
+        const headerCells = headers.map((h, i) => ({
+            id: `th-${uuidv4().slice(0, 8)}`,
+            label: "Header Cell",
+            tag: "th",
+            content: String(h ?? ""),
+            defaultProps: {
+                className: "test-component",
+                style: { ...defaultHeaderStyle }
+            },
+            children: []
+        }));
+
+        // Build tbody rows
+        const bodyRows = bodyData
+            .filter(row => row.some(cell => cell !== undefined && cell !== null && String(cell).trim() !== ""))
+            .map((row, rIdx) => ({
+                id: `tr-${uuidv4().slice(0, 8)}`,
+                label: "Row",
+                tag: "tr",
+                defaultProps: { className: "test-component" },
+                children: headers.map((_, cIdx) => ({
+                    id: `td-${uuidv4().slice(0, 8)}`,
+                    label: "Cell",
+                    tag: "td",
+                    content: String(row[cIdx] ?? ""),
+                    defaultProps: {
+                        className: "test-component",
+                        style: { ...defaultCellStyle }
+                    },
+                    children: []
+                }))
+            }));
+
+        return [
+            {
+                id: `thead-${uuidv4().slice(0, 8)}`,
+                label: "Table Head",
+                tag: "thead",
+                defaultProps: { className: "test-component" },
+                children: [{
+                    id: `tr-${uuidv4().slice(0, 8)}`,
+                    label: "Header Row",
+                    tag: "tr",
+                    defaultProps: { className: "test-component" },
+                    children: headerCells
+                }]
+            },
+            {
+                id: `tbody-${uuidv4().slice(0, 8)}`,
+                label: "Table Body",
+                tag: "tbody",
+                defaultProps: { className: "test-component" },
+                children: bodyRows
+            }
+        ];
+    };
+
     const handleFiles = async (fileList) => {
         if (!fileList || fileList.length === 0) return;
 
         const file = fileList[0];
+        const ext = file.name.split(".").pop().toLowerCase();
+        const isTable = selectedComponent?.tag === "table";
 
+        /* Handle table-specific file import (CSV / Excel) */
+        if (isTable && ["csv", "xlsx", "xls"].includes(ext)) {
+            try {
+                let data;
+
+                if (ext === "csv") {
+                    const text = await file.text();
+                    data = text
+                        .split("\n")
+                        .map(line => line.split(",").map(cell => cell.trim()));
+                } else {
+                    // Excel parsing using xlsx (cellDates converts date serials to JS Date objects)
+                    const buffer = await file.arrayBuffer();
+                    const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    data = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
+                }
+
+                if (!data || data.length === 0) {
+                    toast.error("File is empty");
+                    return;
+                }
+
+                const tableChildren = buildTableFromData(data);
+
+                const newFile = {
+                    id: uuidv4(),
+                    name: file.name,
+                    size: `${(file.size / 1024).toFixed(1)} KB`,
+                    type: ext,
+                    status: "done",
+                    actions: true
+                };
+
+                updateComponent(selectedComponent.id, (node) => {
+                    node.children = tableChildren;
+                    node.defaultProps ??= {};
+                    node.defaultProps.fileId = newFile.id;
+                    node.defaultProps.importedFile = { ...newFile };
+                });
+
+                setFiles(prev => [...prev, newFile]);
+                toast.success(`Imported ${data.length - 1} rows × ${data[0].length} columns`);
+            } catch (err) {
+                toast.error("Failed to parse file");
+                console.error(err);
+            }
+            return;
+        }
+
+        /* Default file handling for non-table components */
         if (!file.text) {
             toast.error("Unsupported file type");
             return;
@@ -234,7 +372,6 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
         const newFile = {
             id: uuidv4(),
             name: file.name,
-            /*Convert the input that come as bytes to kb */
             size: `${(file.size / 1024).toFixed(1)} KB`,
             type: file.name.split(".").pop(),
             status: "done",
@@ -244,7 +381,8 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
         updateComponent(selectedComponent.id, (node) => {
             node.content = formattedText;
             node.defaultProps ??= {};
-            node.defaultProps.fileId ??= newFile.id;
+            node.defaultProps.fileId = newFile.id;
+            node.defaultProps.importedFile = { ...newFile };
         });
 
         setFiles(prev => [...prev, newFile]);
@@ -255,8 +393,19 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
 
         updateComponent(selectedComponent.id, (node) => {
             if (node.defaultProps?.fileId === fileId) {
-                node.content = "enter data";
-                delete node.defaultProps.fileId
+                delete node.defaultProps.fileId;
+                delete node.defaultProps.importedFile;
+
+                // For tables, reset to a default 3-col × 2-row structure
+                if (node.tag === "table") {
+                    node.children = buildTableFromData([
+                        ["Header 1", "Header 2", "Header 3"],
+                        ["Cell 1", "Cell 2", "Cell 3"],
+                        ["Cell 4", "Cell 5", "Cell 6"]
+                    ]);
+                } else {
+                    node.content = "enter data";
+                }
             }
         })
     }
@@ -313,7 +462,14 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
     }, [selectedComponent?.id]);
 
 
-    const filteredFiles = files.filter(f => f.id === selectedComponent?.defaultProps?.fileId);
+    const filteredFiles = (() => {
+        const localFile = files.find(f => f.id === selectedComponent?.defaultProps?.fileId);
+        if (localFile) return [localFile];
+        // Fallback: read persisted file info from the component node
+        const savedFile = selectedComponent?.defaultProps?.importedFile;
+        if (savedFile && selectedComponent?.defaultProps?.fileId) return [savedFile];
+        return [];
+    })();
 
     /*Render the right panel only if a component is selected */
     if (!selectedComponent) {
@@ -387,7 +543,7 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
                                                 />
                                             </div>
                                         )}
-                                        {!["img", "video", "input"].includes(selectedComponent.tag) && (
+                                        {!["img", "video", "input", "table"].includes(selectedComponent.tag) && (
                                             <div className='content'>
                                                 <label>Content</label>
                                                 <input
@@ -422,6 +578,13 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
 
                                 {selectedComponent?.tag === "select" && (
                                     <SelectOption
+                                        selectedComponent={selectedComponent}
+                                        updateComponent={updateComponent}
+                                    />
+                                )}
+
+                                {selectedComponent?.tag === "table" && (
+                                    <TableEditor
                                         selectedComponent={selectedComponent}
                                         updateComponent={updateComponent}
                                     />
@@ -723,7 +886,383 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
                         </>
                     )}
 
-                    {activeTab === 'style' && (
+                    {activeTab === 'style' && selectedComponent.tag === "table" && (
+                        <div className="properties-content">
+                            {/* Table-specific Style Panel */}
+                            <Heading icon={<LayoutDashboard size={18} />} title={'Table Layout'} >
+                                <div className="double-input">
+                                    <div className='input-child'>
+                                        <SizeInput
+                                            label="Width"
+                                            value={selectedComponent.defaultProps?.style?.width}
+                                            onChange={(v) =>
+                                                updateComponent(selectedComponent.id, (node) => {
+                                                    node.defaultProps ??= {};
+                                                    node.defaultProps.style ??= {};
+                                                    node.defaultProps.style.width = v;
+                                                })
+                                            }
+                                            maxPx={1200}
+                                        />
+                                    </div>
+                                    <div className='input-child'>
+                                        <label style={{ fontSize: "10px", textTransform: "uppercase", fontWeight: "bold", color: "gray", display: "block" }}>Border Collapse</label>
+                                        <select
+                                            value={selectedComponent.defaultProps?.style?.borderCollapse || "collapse"}
+                                            onChange={(e) => {
+                                                updateComponent(selectedComponent.id, (node) => {
+                                                    node.defaultProps ??= {};
+                                                    node.defaultProps.style ??= {};
+                                                    node.defaultProps.style.borderCollapse = e.target.value;
+                                                })
+                                            }}
+                                        >
+                                            <option value="collapse">Collapse</option>
+                                            <option value="separate">Separate</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </Heading>
+
+                            <Heading icon={<Space size={18} />} title={'Margin'} >
+                                <FourSideInput
+                                    label="Margin"
+                                    names={["Top", "Right", "Bottom", "Left"]}
+                                    values={[
+                                        parseInt(selectedComponent.defaultProps?.style?.marginTop) ?? 0,
+                                        parseInt(selectedComponent.defaultProps?.style?.marginRight) ?? 0,
+                                        parseInt(selectedComponent.defaultProps?.style?.marginBottom) ?? 0,
+                                        parseInt(selectedComponent.defaultProps?.style?.marginLeft) ?? 0,
+                                    ]}
+                                    onChange={(index, value) => {
+                                        updateComponent(selectedComponent.id, (node) => {
+                                            const map = ["marginTop", "marginRight", "marginBottom", "marginLeft"];
+                                            node.defaultProps ??= {};
+                                            node.defaultProps.style ??= {};
+                                            const actualValue = String(value).replace("px", "");
+                                            node.defaultProps.style[map[index]] = `${actualValue}px`;
+                                        });
+                                    }}
+                                />
+                            </Heading>
+
+                            <Heading icon={<Grid2x2 size={18} />} title={'Table Border'}>
+                                <div className="border">
+                                    <div className="border-properties">
+                                        <div className='border-prop'>
+                                            <label>Width</label>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                value={parseFloat(selectedComponent.defaultProps?.style?.borderWidth) || 0}
+                                                onChange={(e) => {
+                                                    updateComponent(selectedComponent.id, (node) => {
+                                                        node.defaultProps ??= {};
+                                                        node.defaultProps.style ??= {};
+                                                        node.defaultProps.style.borderWidth = `${e.target.value}px`;
+                                                    });
+                                                }}
+                                            />
+                                        </div>
+                                        <div className='border-prop'>
+                                            <label>Style</label>
+                                            <select value={selectedComponent.defaultProps?.style?.borderStyle || "none"} onChange={(e) => {
+                                                updateComponent(selectedComponent.id, (node) => {
+                                                    node.defaultProps ??= {};
+                                                    node.defaultProps.style ??= {};
+                                                    node.defaultProps.style.borderStyle = e.target.value;
+                                                })
+                                            }}>
+                                                <option value="solid">solid</option>
+                                                <option value="dashed">dashed</option>
+                                                <option value="dotted">dotted</option>
+                                                <option value="double">double</option>
+                                                <option value="none">none</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <ColorPalette
+                                        value={selectedComponent.defaultProps?.style?.borderColor ?? "#ddd"}
+                                        onChange={(v) =>
+                                            updateComponent(selectedComponent.id, (node) => {
+                                                node.defaultProps ??= {};
+                                                node.defaultProps.style ??= {};
+                                                node.defaultProps.style.borderColor = v;
+                                            })
+                                        }
+                                    />
+                                </div>
+                            </Heading>
+
+                            <Heading icon={<Grid2x2 size={18} />} title={'Cell Borders'}>
+                                <div className="border">
+                                    <div className="border-properties">
+                                        <div className='border-prop'>
+                                            <label>Width</label>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                value={(() => {
+                                                    const td = selectedComponent.children?.find(c => c.tag === "tbody")?.children?.[0]?.children?.[0];
+                                                    return parseFloat(td?.defaultProps?.style?.borderWidth) || 1;
+                                                })()}
+                                                onChange={(e) => {
+                                                    updateComponent(selectedComponent.id, (node) => {
+                                                        const val = `${e.target.value}px`;
+                                                        // Update all th and td cells
+                                                        node.children?.forEach(section => {
+                                                            section.children?.forEach(row => {
+                                                                row.children?.forEach(cell => {
+                                                                    cell.defaultProps ??= {};
+                                                                    cell.defaultProps.style ??= {};
+                                                                    cell.defaultProps.style.borderWidth = val;
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                }}
+                                            />
+                                        </div>
+                                        <div className='border-prop'>
+                                            <label>Style</label>
+                                            <select
+                                                value={(() => {
+                                                    const td = selectedComponent.children?.find(c => c.tag === "tbody")?.children?.[0]?.children?.[0];
+                                                    return td?.defaultProps?.style?.borderStyle || "solid";
+                                                })()}
+                                                onChange={(e) => {
+                                                    updateComponent(selectedComponent.id, (node) => {
+                                                        node.children?.forEach(section => {
+                                                            section.children?.forEach(row => {
+                                                                row.children?.forEach(cell => {
+                                                                    cell.defaultProps ??= {};
+                                                                    cell.defaultProps.style ??= {};
+                                                                    cell.defaultProps.style.borderStyle = e.target.value;
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                }}
+                                            >
+                                                <option value="solid">solid</option>
+                                                <option value="dashed">dashed</option>
+                                                <option value="dotted">dotted</option>
+                                                <option value="double">double</option>
+                                                <option value="none">none</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <ColorPalette
+                                        value={(() => {
+                                            const td = selectedComponent.children?.find(c => c.tag === "tbody")?.children?.[0]?.children?.[0];
+                                            return td?.defaultProps?.style?.borderColor ?? "#ddd";
+                                        })()}
+                                        onChange={(v) =>
+                                            updateComponent(selectedComponent.id, (node) => {
+                                                node.children?.forEach(section => {
+                                                    section.children?.forEach(row => {
+                                                        row.children?.forEach(cell => {
+                                                            cell.defaultProps ??= {};
+                                                            cell.defaultProps.style ??= {};
+                                                            cell.defaultProps.style.borderColor = v;
+                                                        });
+                                                    });
+                                                });
+                                            })
+                                        }
+                                    />
+                                </div>
+                            </Heading>
+
+                            <Heading icon={<Rows3 size={18} />} title={'Header Style'}>
+                                <div className='background-content'>
+                                    <label>Header Background</label>
+                                    <ColorPalette
+                                        value={(() => {
+                                            const th = selectedComponent.children?.find(c => c.tag === "thead")?.children?.[0]?.children?.[0];
+                                            return th?.defaultProps?.style?.backgroundColor ?? "#4aa500";
+                                        })()}
+                                        onChange={(v) =>
+                                            updateComponent(selectedComponent.id, (node) => {
+                                                const headerRow = node.children?.find(c => c.tag === "thead")?.children?.[0];
+                                                if (!headerRow) return;
+                                                headerRow.children.forEach(th => {
+                                                    th.defaultProps ??= {};
+                                                    th.defaultProps.style ??= {};
+                                                    th.defaultProps.style.backgroundColor = v;
+                                                });
+                                            })
+                                        }
+                                    />
+                                    <label>Header Text Color</label>
+                                    <ColorPalette
+                                        value={(() => {
+                                            const th = selectedComponent.children?.find(c => c.tag === "thead")?.children?.[0]?.children?.[0];
+                                            return th?.defaultProps?.style?.color ?? "#ffffff";
+                                        })()}
+                                        onChange={(v) =>
+                                            updateComponent(selectedComponent.id, (node) => {
+                                                const headerRow = node.children?.find(c => c.tag === "thead")?.children?.[0];
+                                                if (!headerRow) return;
+                                                headerRow.children.forEach(th => {
+                                                    th.defaultProps ??= {};
+                                                    th.defaultProps.style ??= {};
+                                                    th.defaultProps.style.color = v;
+                                                });
+                                            })
+                                        }
+                                    />
+                                    <div className="double-input">
+                                        <div className='input-child'>
+                                            <label>Font Weight</label>
+                                            <select
+                                                value={(() => {
+                                                    const th = selectedComponent.children?.find(c => c.tag === "thead")?.children?.[0]?.children?.[0];
+                                                    return th?.defaultProps?.style?.fontWeight ?? "600";
+                                                })()}
+                                                onChange={(e) => {
+                                                    updateComponent(selectedComponent.id, (node) => {
+                                                        const headerRow = node.children?.find(c => c.tag === "thead")?.children?.[0];
+                                                        if (!headerRow) return;
+                                                        headerRow.children.forEach(th => {
+                                                            th.defaultProps ??= {};
+                                                            th.defaultProps.style ??= {};
+                                                            th.defaultProps.style.fontWeight = e.target.value;
+                                                        });
+                                                    });
+                                                }}
+                                            >
+                                                <option value="400">400 (Normal)</option>
+                                                <option value="500">500 (Medium)</option>
+                                                <option value="600">600 (Semi Bold)</option>
+                                                <option value="700">700 (Bold)</option>
+                                                <option value="800">800 (Extra Bold)</option>
+                                            </select>
+                                        </div>
+                                        <div className='input-child'>
+                                            <label>Text Align</label>
+                                            <select
+                                                value={(() => {
+                                                    const th = selectedComponent.children?.find(c => c.tag === "thead")?.children?.[0]?.children?.[0];
+                                                    return th?.defaultProps?.style?.textAlign ?? "left";
+                                                })()}
+                                                onChange={(e) => {
+                                                    updateComponent(selectedComponent.id, (node) => {
+                                                        const headerRow = node.children?.find(c => c.tag === "thead")?.children?.[0];
+                                                        if (!headerRow) return;
+                                                        headerRow.children.forEach(th => {
+                                                            th.defaultProps ??= {};
+                                                            th.defaultProps.style ??= {};
+                                                            th.defaultProps.style.textAlign = e.target.value;
+                                                        });
+                                                    });
+                                                }}
+                                            >
+                                                <option value="left">⬅ Left</option>
+                                                <option value="center">⬌ Center</option>
+                                                <option value="right">➡ Right</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Heading>
+
+                            <Heading icon={<MountainSnow size={18} />} title={'Background'}>
+                                <div className='background-content'>
+                                    <label>Background color</label>
+                                    <ColorPalette
+                                        value={selectedComponent.defaultProps?.style?.backgroundColor ?? "transparent"}
+                                        onChange={(v) =>
+                                            updateComponent(selectedComponent.id, (node) => {
+                                                node.defaultProps ??= {};
+                                                node.defaultProps.style ??= {};
+                                                node.defaultProps.style.backgroundColor = v;
+                                            })
+                                        }
+                                    />
+                                    <SliderInput label={'opacity'} value={Number((selectedComponent.defaultProps?.style?.opacity ?? 1) * 100).toFixed(0)} min={0} max={100} unit='%' onChange={(v) => {
+                                        updateComponent(selectedComponent.id, (node) => {
+                                            node.defaultProps ??= {};
+                                            node.defaultProps.style ??= {};
+                                            node.defaultProps.style.opacity = v / 100;
+                                        });
+                                    }} />
+                                </div>
+                            </Heading>
+
+                            <Heading icon={<Type size={18} />} title={'Typography'} >
+                                <div className="typo">
+                                    <div className="double-input">
+                                        <div className='input-child'>
+                                            <label>Font Size</label>
+                                            <input type="number" max={72} value={parseFloat(selectedComponent.defaultProps?.style?.fontSize) || 14} onChange={(e) => {
+                                                updateComponent(selectedComponent.id, (node) => {
+                                                    node.defaultProps ??= {};
+                                                    node.defaultProps.style ??= {};
+                                                    node.defaultProps.style.fontSize = `${e.target.value}px`
+                                                })
+                                            }} />
+                                        </div>
+                                        <div className='input-child'>
+                                            <label>Text Align</label>
+                                            <select value={selectedComponent.defaultProps?.style?.textAlign || "left"} onChange={(e) => {
+                                                updateComponent(selectedComponent.id, (node) => {
+                                                    node.defaultProps ??= {};
+                                                    node.defaultProps.style ??= {};
+                                                    node.defaultProps.style.textAlign = e.target.value;
+                                                })
+                                            }}>
+                                                <option value="left">⬅ Left</option>
+                                                <option value="center">⬌ Center</option>
+                                                <option value="right">➡ Right</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="color">
+                                        <label id='text-color'>Text color</label>
+                                        <ColorPalette
+                                            value={selectedComponent.defaultProps?.style?.color || "#333"}
+                                            onChange={(v) =>
+                                                updateComponent(selectedComponent.id, (node) => {
+                                                    node.defaultProps ??= {};
+                                                    node.defaultProps.style ??= {};
+                                                    node.defaultProps.style.color = v;
+                                                })
+                                            }
+                                        />
+                                    </div>
+                                    <div className="font-input">
+                                        <label>Font family</label>
+                                        <select
+                                            value={selectedComponent.defaultProps?.style?.fontFamily || ""}
+                                            onChange={(e) => {
+                                                const font = e.target.value;
+                                                if (font) {
+                                                    WebFont.load({ google: { families: [font] } });
+                                                }
+                                                updateComponent(selectedComponent.id, (node) => {
+                                                    node.defaultProps ??= {};
+                                                    node.defaultProps.style ??= {};
+                                                    node.defaultProps.style.fontFamily = e.target.value;
+                                                })
+                                            }}
+                                        >
+                                            <option value="">Default</option>
+                                            <option value="Roboto">Roboto</option>
+                                            <option value="Poppins">Poppins</option>
+                                            <option value="Open Sans">Open Sans</option>
+                                            <option value="Montserrat">Montserrat</option>
+                                            <option value="Inter">Inter</option>
+                                            <option value="Lato">Lato</option>
+                                            <option value="Nunito">Nunito</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </Heading>
+                        </div>
+                    )}
+
+                    {activeTab === 'style' && selectedComponent.tag !== "table" && (
                         <div className="properties-content">
                             <Heading icon={<LayoutDashboard size={18} />} title={'Layout'} >
                                 <div className="double-input">
@@ -736,15 +1275,12 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
                                                 updateComponent(selectedComponent.id, (node) => {
                                                     node.defaultProps ??= {};
                                                     node.defaultProps.style ??= {};
-
                                                     let className = node.defaultProps.className;
-
                                                     if (value === 'none') {
                                                         if (!className.includes('hidden')) {
                                                             node.defaultProps.className = className + " hidden";
                                                         }
                                                         node.defaultProps.style.opacity = 0.2;
-                                                        // node.defaultProps.style.display = value;
                                                     } else {
                                                         node.defaultProps.className = className.replace('hidden', "").trim();
                                                         node.defaultProps.style.opacity = 1;
@@ -790,18 +1326,10 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
                                         ]}
                                         onChange={(index, value) => {
                                             updateComponent(selectedComponent.id, (node) => {
-                                                const map = [
-                                                    "top",
-                                                    "right",
-                                                    "bottom",
-                                                    "left",
-                                                ];
-
+                                                const map = ["top", "right", "bottom", "left"];
                                                 node.defaultProps ??= {};
                                                 node.defaultProps.style ??= {};
-
                                                 const actualValue = String(value).replace("px", "");
-
                                                 node.defaultProps.style[map[index]] = `${actualValue}px`;
                                             })
                                         }}
@@ -836,8 +1364,6 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
                                         />
                                     </div>
                                 </div>
-
-
                             </Heading>
                             {display === 'flex' && (
                                 <Heading icon={<Columns3 size={18} />} title={'Flex Layout'} >
@@ -1530,8 +2056,16 @@ const RightSideBar = ({ selectedComponent, updateComponent, deleteComponent }) =
                             )}
                             {FILE_IMPORT_TAGS.includes(selectedComponent.tag) && (
                                 <>
-                                    <Heading icon={<FileUp size={18} />} title={'External Data Source'}>
-                                        <FileUpload onFilesAdded={handleFiles} />
+                                    <Heading icon={<FileUp size={18} />} title={selectedComponent.tag === "table" ? 'Import Spreadsheet' : 'External Data Source'}>
+                                        {selectedComponent.tag === "table" ? (
+                                            <FileUpload
+                                                onFilesAdded={handleFiles}
+                                                accept=".csv,.xlsx,.xls"
+                                                hint={<>Drop <span>.csv</span> or <span>.xlsx</span> file here or <span>browse</span></>}
+                                            />
+                                        ) : (
+                                            <FileUpload onFilesAdded={handleFiles} />
+                                        )}
                                         <ImportedFiles files={filteredFiles} onDelete={deleteFile} />
                                     </Heading>
 
@@ -1714,7 +2248,7 @@ const GridTemplateInput = ({ label, value, onChange }) => {
     );
 };
 
-const FileUpload = ({ onFilesAdded }) => {
+const FileUpload = ({ onFilesAdded, accept, hint }) => {
     const inputRef = useRef(null);
 
     return (
@@ -1722,7 +2256,7 @@ const FileUpload = ({ onFilesAdded }) => {
             <input
                 ref={inputRef}
                 type="file"
-                multiple
+                accept={accept || undefined}
                 style={{ display: "none" }}
                 onChange={(e) => onFilesAdded(e.target.files)}
             />
@@ -1736,7 +2270,7 @@ const FileUpload = ({ onFilesAdded }) => {
                     onFilesAdded(e.dataTransfer.files);
                 }}
             >
-                Drop files here or <span>browse</span>
+                {hint || <>Drop files here or <span>browse</span></>}
             </div>
         </>
     );
@@ -2001,6 +2535,240 @@ const SelectOption = ({ selectedComponent, updateComponent }) => {
     )
 };
 
+const TableEditor = ({ selectedComponent, updateComponent }) => {
+    // Extract thead and tbody from table children
+    const tableChildren = selectedComponent.children ?? [];
+    const thead = tableChildren.find(c => c.tag === "thead");
+    const tbody = tableChildren.find(c => c.tag === "tbody");
 
+    const headerRow = thead?.children?.[0];
+    const headerCells = headerRow?.children ?? [];
+    const bodyRows = tbody?.children ?? [];
+    const colCount = headerCells.length;
+    const rowCount = bodyRows.length;
+
+    // Default cell style for new cells
+    const defaultCellStyle = {
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: "#ddd",
+        paddingTop: "10px",
+        paddingBottom: "10px",
+        paddingLeft: "12px",
+        paddingRight: "12px"
+    };
+
+    const defaultHeaderStyle = {
+        ...defaultCellStyle,
+        backgroundColor: "#4aa500",
+        color: "#ffffff",
+        textAlign: "left",
+        fontWeight: "600"
+    };
+
+    // Add a column
+    const addColumn = () => {
+        updateComponent(selectedComponent.id, (node) => {
+            const theadNode = node.children?.find(c => c.tag === "thead");
+            const tbodyNode = node.children?.find(c => c.tag === "tbody");
+            if (!theadNode || !tbodyNode) return;
+
+            const hRow = theadNode.children?.[0];
+            if (!hRow) return;
+
+            const newColIndex = hRow.children.length + 1;
+
+            // Add header cell
+            hRow.children.push({
+                id: `th-${uuidv4().slice(0, 8)}`,
+                label: "Header Cell",
+                tag: "th",
+                content: `Header ${newColIndex}`,
+                defaultProps: {
+                    className: "test-component",
+                    style: { ...defaultHeaderStyle }
+                },
+                children: []
+            });
+
+            // Add cell to each body row
+            tbodyNode.children.forEach((row, rIdx) => {
+                row.children.push({
+                    id: `td-${uuidv4().slice(0, 8)}`,
+                    label: "Cell",
+                    tag: "td",
+                    content: `New`,
+                    defaultProps: {
+                        className: "test-component",
+                        style: { ...defaultCellStyle }
+                    },
+                    children: []
+                });
+            });
+        });
+    };
+
+    // Remove last column
+    const removeColumn = () => {
+        if (colCount <= 1) return;
+        updateComponent(selectedComponent.id, (node) => {
+            const theadNode = node.children?.find(c => c.tag === "thead");
+            const tbodyNode = node.children?.find(c => c.tag === "tbody");
+            if (!theadNode || !tbodyNode) return;
+
+            const hRow = theadNode.children?.[0];
+            if (!hRow || hRow.children.length <= 1) return;
+
+            hRow.children.pop();
+
+            tbodyNode.children.forEach((row) => {
+                if (row.children.length > 0) {
+                    row.children.pop();
+                }
+            });
+        });
+    };
+
+    // Add a row
+    const addRow = () => {
+        updateComponent(selectedComponent.id, (node) => {
+            const tbodyNode = node.children?.find(c => c.tag === "tbody");
+            const theadNode = node.children?.find(c => c.tag === "thead");
+            if (!tbodyNode || !theadNode) return;
+
+            const cols = theadNode.children?.[0]?.children?.length ?? 3;
+            const newRowIndex = tbodyNode.children.length + 1;
+
+            const cells = Array.from({ length: cols }, (_, cIdx) => ({
+                id: `td-${uuidv4().slice(0, 8)}`,
+                label: "Cell",
+                tag: "td",
+                content: `Cell`,
+                defaultProps: {
+                    className: "test-component",
+                    style: { ...defaultCellStyle }
+                },
+                children: []
+            }));
+
+            tbodyNode.children.push({
+                id: `tr-${uuidv4().slice(0, 8)}`,
+                label: "Row",
+                tag: "tr",
+                defaultProps: {
+                    className: "test-component"
+                },
+                children: cells
+            });
+        });
+    };
+
+    // Remove last row
+    const removeRow = () => {
+        if (rowCount <= 1) return;
+        updateComponent(selectedComponent.id, (node) => {
+            const tbodyNode = node.children?.find(c => c.tag === "tbody");
+            if (!tbodyNode || tbodyNode.children.length <= 1) return;
+            tbodyNode.children.pop();
+        });
+    };
+
+    // Update header cell content
+    const updateHeaderCell = (colIndex, value) => {
+        updateComponent(selectedComponent.id, (node) => {
+            const theadNode = node.children?.find(c => c.tag === "thead");
+            const cell = theadNode?.children?.[0]?.children?.[colIndex];
+            if (cell) cell.content = value;
+        });
+    };
+
+    // Update body cell content
+    const updateBodyCell = (rowIndex, colIndex, value) => {
+        updateComponent(selectedComponent.id, (node) => {
+            const tbodyNode = node.children?.find(c => c.tag === "tbody");
+            const cell = tbodyNode?.children?.[rowIndex]?.children?.[colIndex];
+            if (cell) cell.content = value;
+        });
+    };
+
+    return (
+        <>
+            {/* Table Structure Controls */}
+            <Heading icon={<Table2 size={18} />} title={'Table Structure'}>
+                <div className="table-editor">
+                    <div className="table-editor-info">
+                        <span>{rowCount} rows × {colCount} columns</span>
+                    </div>
+
+                    <div className="table-editor-controls">
+                        <div className="table-editor-control-group">
+                            <label>Rows</label>
+                            <div className="table-editor-buttons">
+                                <button onClick={removeRow} disabled={rowCount <= 1} className="table-editor-btn">
+                                    <Minus size={14} />
+                                </button>
+                                <span className="table-editor-count">{rowCount}</span>
+                                <button onClick={addRow} className="table-editor-btn">
+                                    <Plus size={14} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="table-editor-control-group">
+                            <label>Columns</label>
+                            <div className="table-editor-buttons">
+                                <button onClick={removeColumn} disabled={colCount <= 1} className="table-editor-btn">
+                                    <Minus size={14} />
+                                </button>
+                                <span className="table-editor-count">{colCount}</span>
+                                <button onClick={addColumn} className="table-editor-btn">
+                                    <Plus size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Heading>
+
+            {/* Header Cell Editing */}
+            <Heading icon={<Rows3 size={18} />} title={'Header Cells'}>
+                <div className="table-editor-cells">
+                    {headerCells.map((cell, cIdx) => (
+                        <div key={cell.id || cIdx} className="table-editor-cell-row">
+                            <span className="table-editor-cell-label">Col {cIdx + 1}</span>
+                            <input
+                                type="text"
+                                value={cell.content || ""}
+                                onChange={(e) => updateHeaderCell(cIdx, e.target.value)}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </Heading>
+
+            {/* Body Cell Editing */}
+            <Heading icon={<Columns3 size={18} />} title={'Body Cells'}>
+                <div className="table-editor-cells">
+                    {bodyRows.map((row, rIdx) => (
+                        <div key={row.id || rIdx} className="table-editor-row-group">
+                            <span className="table-editor-row-label">Row {rIdx + 1}</span>
+                            <div className="table-editor-row-cells">
+                                {(row.children ?? []).map((cell, cIdx) => (
+                                    <div key={cell.id || cIdx} className="table-editor-cell-row">
+                                        <span className="table-editor-cell-label">C{cIdx + 1}</span>
+                                        <input
+                                            type="text"
+                                            value={cell.content || ""}
+                                            onChange={(e) => updateBodyCell(rIdx, cIdx, e.target.value)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </Heading>
+        </>
+    );
+};
 
 export default RightSideBar

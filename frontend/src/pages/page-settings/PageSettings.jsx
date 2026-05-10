@@ -6,12 +6,9 @@ import {
   FileText,
   Clock,
   Globe,
-  Layers,
   Copy,
   Check,
   ExternalLink,
-  Hash,
-  FolderOpen,
   X,
   Rocket,
   Undo2,
@@ -371,49 +368,27 @@ const PageSettings = () => {
               <label>DESCRIPTION</label>
               <input type="text" className="page-settings-input" value={descValue} onChange={(e) => setDescValue(e.target.value)} placeholder="Enter description" />
             </div>
-            <div className="page-settings-row">
-              <div className="page-settings-field">
-                <label><Hash size={12} /> PAGE ID</label>
-                <div className="page-settings-field-value readonly">{page.pageId}</div>
-              </div>
-              <div className="page-settings-field">
-                <label><FolderOpen size={12} /> PROJECT ID</label>
-                <div className="page-settings-field-value readonly">{page.projectId}</div>
-              </div>
-            </div>
           </div>
 
           <div className="page-settings-divider" />
 
-          {/* Status & Components */}
-          <div className="page-settings-row">
-            <div className="page-settings-field">
-              <label><Globe size={12} /> STATUS</label>
-              <div className="page-settings-status-row">
-                <span className={`page-settings-badge ${page.isPublished ? "published" : "draft"}`}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: page.isPublished ? "#16a34a" : "#92400e", display: "inline-block" }} />
-                  {page.isPublished ? "Published" : "Draft"}
-                </span>
-                {page.isPublished ? (
-                  <button className="page-settings-publish-btn unpublish" onClick={handleUnpublish} disabled={publishing}>
-                    <Undo2 size={14} /> {publishing ? "..." : "Unpublish"}
-                  </button>
-                ) : (
-                  <button className="page-settings-publish-btn publish" onClick={handlePublish} disabled={publishing}>
-                    <Rocket size={14} /> {publishing ? "..." : "Publish"}
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="page-settings-field">
-              <label><Layers size={12} /> COMPONENTS</label>
-              <div className="page-settings-stat">
-                <div className="page-settings-stat-icon"><Layers size={18} /></div>
-                <div className="page-settings-stat-info">
-                  <span>Total elements</span>
-                  <p>{componentCount}</p>
-                </div>
-              </div>
+          {/* Status */}
+          <div className="page-settings-field">
+            <label><Globe size={12} /> STATUS</label>
+            <div className="page-settings-status-row">
+              <span className={`page-settings-badge ${page.isPublished ? "published" : "draft"}`}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: page.isPublished ? "#16a34a" : "#92400e", display: "inline-block" }} />
+                {page.isPublished ? "Published" : "Draft"}
+              </span>
+              {page.isPublished ? (
+                <button className="page-settings-publish-btn unpublish" onClick={handleUnpublish} disabled={publishing}>
+                  <Undo2 size={14} /> {publishing ? "..." : "Unpublish"}
+                </button>
+              ) : (
+                <button className="page-settings-publish-btn publish" onClick={handlePublish} disabled={publishing}>
+                  <Rocket size={14} /> {publishing ? "..." : "Publish"}
+                </button>
+              )}
             </div>
           </div>
 

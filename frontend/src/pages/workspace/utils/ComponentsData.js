@@ -15,7 +15,7 @@ import {
   PanelTop,
   AlignStartVertical,
   LayoutList,
-  Video
+  Table
 } from "lucide-react";
 
 export const components = [
@@ -1179,7 +1179,8 @@ export const components = [
         tag: "h2",
         rank: 4,
         content: "Heading Text",
-        defaultProps: { className: "basic-heading test-component" }
+        defaultProps: { className: "basic-heading test-component" },
+        children: []
       },
       {
         id: "paragraph",
@@ -1188,7 +1189,8 @@ export const components = [
         tag: "p",
         rank: 4,
         content: "Paragraph text goes here. This is a sample paragraph that can be edited later.",
-        defaultProps: { className: "basicparagraph test-component" }
+        defaultProps: { className: "basicparagraph test-component" },
+        children: []
       },
       {
         id: "image",
@@ -1212,7 +1214,8 @@ export const components = [
         defaultProps: {
           className: "basic-button test-component",
           type: "button",
-        }
+        },
+        children: []
       },
       {
         id: "link",
@@ -1224,7 +1227,8 @@ export const components = [
         defaultProps: {
           className: "basic-link test-component",
           href: "#"
-        }
+        },
+        children: []
       },
       {
         id: "divider",
@@ -1232,7 +1236,264 @@ export const components = [
         icon: Minus,
         tag: "hr",
         rank: 4,
-        defaultProps: { className: "basic-divider test-component" }
+        defaultProps: { className: "basic-divider test-component" },
+        children: []
+      },
+      {
+        id: "table",
+        label: "Table",
+        icon: Table,
+        tag: "table",
+        rank: 4,
+        content: "",
+        defaultProps: {
+          className: "basic-table test-component",
+          style: {
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: "14px",
+            color: "#333",
+            paddingTop: "10px",
+            paddingBottom: "10px",
+            paddingLeft: "10px",
+            paddingRight: "10px"
+          }
+        },
+        children: [
+          {
+            id: "table-thead",
+            label: "Table Head",
+            tag: "thead",
+            defaultProps: {
+              className: "test-component"
+            },
+            children: [
+              {
+                id: "table-thead-row",
+                label: "Header Row",
+                tag: "tr",
+                defaultProps: {
+                  className: "test-component"
+                },
+                children: [
+                  {
+                    id: "table-th-1",
+                    label: "Header Cell",
+                    tag: "th",
+                    content: "Header 1",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px",
+                        backgroundColor: "#4aa500",
+                        color: "#ffffff",
+                        textAlign: "left",
+                        fontWeight: "600"
+                      }
+                    },
+                    children: []
+                  },
+                  {
+                    id: "table-th-2",
+                    label: "Header Cell",
+                    tag: "th",
+                    content: "Header 2",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px",
+                        backgroundColor: "#4aa500",
+                        color: "#ffffff",
+                        textAlign: "left",
+                        fontWeight: "600"
+                      }
+                    },
+                    children: []
+                  },
+                  {
+                    id: "table-th-3",
+                    label: "Header Cell",
+                    tag: "th",
+                    content: "Header 3",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px",
+                        backgroundColor: "#4aa500",
+                        color: "#ffffff",
+                        textAlign: "left",
+                        fontWeight: "600"
+                      }
+                    },
+                    children: []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            id: "table-tbody",
+            label: "Table Body",
+            tag: "tbody",
+            defaultProps: {
+              className: "test-component"
+            },
+            children: [
+              {
+                id: "table-row-1",
+                label: "Row",
+                tag: "tr",
+                defaultProps: {
+                  className: "test-component"
+                },
+                children: [
+                  {
+                    id: "table-cell-1-1",
+                    label: "Cell",
+                    tag: "td",
+                    content: "Cell 1",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px"
+                      }
+                    },
+                    children: []
+                  },
+                  {
+                    id: "table-cell-1-2",
+                    label: "Cell",
+                    tag: "td",
+                    content: "Cell 2",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px"
+                      }
+                    },
+                    children: []
+                  },
+                  {
+                    id: "table-cell-1-3",
+                    label: "Cell",
+                    tag: "td",
+                    content: "Cell 3",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px"
+                      }
+                    },
+                    children: []
+                  }
+                ]
+              },
+              {
+                id: "table-row-2",
+                label: "Row",
+                tag: "tr",
+                defaultProps: {
+                  className: "test-component"
+                },
+                children: [
+                  {
+                    id: "table-cell-2-1",
+                    label: "Cell",
+                    tag: "td",
+                    content: "Cell 4",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px"
+                      }
+                    },
+                    children: []
+                  },
+                  {
+                    id: "table-cell-2-2",
+                    label: "Cell",
+                    tag: "td",
+                    content: "Cell 5",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px"
+                      }
+                    },
+                    children: []
+                  },
+                  {
+                    id: "table-cell-2-3",
+                    label: "Cell",
+                    tag: "td",
+                    content: "Cell 6",
+                    defaultProps: {
+                      className: "test-component",
+                      style: {
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                        borderColor: "#ddd",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px"
+                      }
+                    },
+                    children: []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ]
   },

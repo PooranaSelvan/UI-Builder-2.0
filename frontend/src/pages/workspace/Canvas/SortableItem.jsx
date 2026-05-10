@@ -5,12 +5,35 @@ import { useDroppable } from "@dnd-kit/core";
 import { VOID_TAGS } from "../utils/voidTags";
 import { CSS } from '@dnd-kit/utilities';
 
+/* Recursively render table children without SortableItem div wrappers */
+const renderTableChildren = (children, onSelect, tableId) => {
+     if (!children || children.length === 0) return null;
+
+     return children.map((child, index) => {
+          const { id, tag, content, defaultProps = {}, children: subChildren = [] } = child;
+
+          const clickHandler = (e) => {
+               e.stopPropagation();
+               onSelect(tableId);
+          };
+
+          if (VOID_TAGS.has(tag)) {
+               return React.createElement(tag, { ...defaultProps, key: id || index, onClick: clickHandler });
+          }
+
+          const childContent = subChildren.length > 0
+               ? renderTableChildren(subChildren, onSelect, tableId)
+               : content;
+
+          return React.createElement(tag, { ...defaultProps, key: id || index, onClick: clickHandler }, childContent);
+     });
+};
+
 const SortableItem = ({ ele, isSelected, onSelect, selectedComponentId }) => {
      const { id, tag, content, defaultProps, children = [], rank } = ele;
      const { setNodeRef, attributes, listeners, transform, transition } = useSortable({ id });
      const isVoid = typeof tag === "string" && VOID_TAGS.has(tag);
-
-     // console.log(listeners, defaultProps, attributes);
+     const isTable = tag === "table";
 
      const selectComponent = (e) => {
           e.stopPropagation();
@@ -33,6 +56,22 @@ const SortableItem = ({ ele, isSelected, onSelect, selectedComponentId }) => {
           position: "relative",
           outlineOffset: "2px"
      };
+
+     /* For table elements, render children natively to preserve table HTML structure */
+     if (isTable) {
+          const tableWrapperStyle = {
+               ...style,
+               padding: "10px",
+               cursor: "pointer"
+          };
+          return (
+               <div ref={(node) => { setNodeRef(node); setDropRef(node) }} style={tableWrapperStyle} {...attributes} onDoubleClick={selectComponent} {...listeners} className="test-component">
+                    {React.createElement(tag, { ...defaultProps, onClick: selectComponent },
+                         children?.length > 0 ? renderTableChildren(children, onSelect, id) : content
+                    )}
+               </div>
+          );
+     }
 
      return (
           <div ref={(node) => { setNodeRef(node); setDropRef(node) }} style={style} {...attributes} onDoubleClick={selectComponent} {...listeners} className="test-component">
