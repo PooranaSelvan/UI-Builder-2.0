@@ -31,6 +31,121 @@ const Workspace = ({ isAuthenticated }) => {
   const [deleteTargetId, setDeleteTargetId] = useState(null);
   const pageMetaRef = useRef(null);
 
+  // ── Undo / Redo (session-only) ──
+  const historyRef = useRef([]);      // past snapshots
+  const futureRef = useRef([]);       // redo snapshots
+  const isUndoRedoRef = useRef(false); // flag to skip recording during undo/redo
+  const componentsRef = useRef([]);   // always mirrors latest components state
+  const [historyVersion, setHistoryVersion] = useState(0); // forces re-render for canUndo/canRedo
+  const propertyChangeTimerRef = useRef(null); // debounce timer for property edits
+  const propertyBaseSnapshotRef = useRef(null); // snapshot before a burst of property edits
+
+  // Keep componentsRef in sync with state
+  useEffect(() => { componentsRef.current = components; }, [components]);
+
+  // Push a snapshot to history (clears redo stack)
+  const pushHistory = useCallback((snapshot) => {
+    historyRef.current = [...historyRef.current, snapshot];
+    if (historyRef.current.length > 50) {
+      historyRef.current = historyRef.current.slice(-50);
+    }
+    futureRef.current = [];
+    setHistoryVersion(v => v + 1);
+  }, []);
+
+  // Wrap setComponents so every mutation auto-records history
+  const setComponentsWithHistory = useCallback((updater) => {
+    // Snapshot current state BEFORE the update (read from ref — no side effects in updater)
+    const snapshot = JSON.parse(JSON.stringify(componentsRef.current));
+    pushHistory(snapshot);
+    // Clear any pending property-edit debounce since a structural change happened
+    if (propertyChangeTimerRef.current) {
+      clearTimeout(propertyChangeTimerRef.current);
+      propertyChangeTimerRef.current = null;
+      propertyBaseSnapshotRef.current = null;
+    }
+    setComponents((prev) => typeof updater === "function" ? updater(prev) : updater);
+  }, [pushHistory]);
+
+  // Debounced version for rapid property edits (typing, color picking, sliders)
+  const setComponentsWithDebouncedHistory = useCallback((updater) => {
+    // On the FIRST edit in a burst, capture the base snapshot
+    if (!propertyBaseSnapshotRef.current) {
+      propertyBaseSnapshotRef.current = JSON.parse(JSON.stringify(componentsRef.current));
+    }
+    // Clear previous timer
+    if (propertyChangeTimerRef.current) {
+      clearTimeout(propertyChangeTimerRef.current);
+    }
+    // Apply the change immediately (so UI updates)
+    isUndoRedoRef.current = true; // skip pushHistory from other paths
+    setComponents((prev) => typeof updater === "function" ? updater(prev) : updater);
+    setTimeout(() => { isUndoRedoRef.current = false; }, 0);
+    // After 400ms of inactivity, commit the base snapshot to history
+    propertyChangeTimerRef.current = setTimeout(() => {
+      if (propertyBaseSnapshotRef.current) {
+        pushHistory(propertyBaseSnapshotRef.current);
+        propertyBaseSnapshotRef.current = null;
+      }
+      propertyChangeTimerRef.current = null;
+    }, 400);
+  }, [pushHistory]);
+
+  const canUndo = historyRef.current.length > 0;
+  const canRedo = futureRef.current.length > 0;
+
+  const handleUndo = useCallback(() => {
+    if (historyRef.current.length === 0) return;
+    // Flush any pending property-edit debounce
+    if (propertyChangeTimerRef.current) {
+      clearTimeout(propertyChangeTimerRef.current);
+      propertyChangeTimerRef.current = null;
+      if (propertyBaseSnapshotRef.current) {
+        pushHistory(propertyBaseSnapshotRef.current);
+        propertyBaseSnapshotRef.current = null;
+      }
+    }
+    // Snapshot current → future, pop history → set as current
+    const currentSnapshot = JSON.parse(JSON.stringify(componentsRef.current));
+    const previous = historyRef.current.pop();
+    futureRef.current = [...futureRef.current, currentSnapshot];
+    isUndoRedoRef.current = true;
+    setComponents(previous);
+    setHistoryVersion(v => v + 1);
+    setSelectedComponentId(null);
+    setTimeout(() => { isUndoRedoRef.current = false; }, 0);
+  }, [pushHistory]);
+
+  const handleRedo = useCallback(() => {
+    if (futureRef.current.length === 0) return;
+    // Snapshot current → history, pop future → set as current
+    const currentSnapshot = JSON.parse(JSON.stringify(componentsRef.current));
+    const next = futureRef.current.pop();
+    historyRef.current = [...historyRef.current, currentSnapshot];
+    isUndoRedoRef.current = true;
+    setComponents(next);
+    setHistoryVersion(v => v + 1);
+    setSelectedComponentId(null);
+    setTimeout(() => { isUndoRedoRef.current = false; }, 0);
+  }, []);
+
+  // Keyboard shortcuts: Cmd/Ctrl + Z (undo), Cmd/Ctrl + Shift + Z (redo)
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const isMod = e.metaKey || e.ctrlKey;
+      if (isMod && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      if (isMod && e.key === "z" && e.shiftKey) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleUndo, handleRedo]);
+
 
   useEffect(() => {
     async function getUser() {
@@ -265,7 +380,7 @@ const Workspace = ({ isAuthenticated }) => {
 
         const clonedComponent = cloneWithNewIds(componentData);
 
-        setComponents((prev) => [...prev, clonedComponent]);
+        setComponentsWithHistory((prev) => [...prev, clonedComponent]);
         setSelectedComponentId(clonedComponent.id);
 
         return;
@@ -281,7 +396,7 @@ const Workspace = ({ isAuthenticated }) => {
 
       let newChild = cloneWithNewIds(componentData);
 
-      setComponents((items) => addChildToComponent(items, over.id, newChild));
+      setComponentsWithHistory((items) => addChildToComponent(items, over.id, newChild));
       return;
     }
 
@@ -296,7 +411,7 @@ const Workspace = ({ isAuthenticated }) => {
         return;
       }
 
-      setComponents((items) => {
+      setComponentsWithHistory((items) => {
         const { newComponent, child } = removeChild(items, active.id);
         return [...newComponent, child];
       });
@@ -325,7 +440,7 @@ const Workspace = ({ isAuthenticated }) => {
       const newIndex = components.findIndex(i => i.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        setComponents(items => arrayMove(items, oldIndex, newIndex));
+        setComponentsWithHistory(items => arrayMove(items, oldIndex, newIndex));
         return;
       }
     }
@@ -340,7 +455,7 @@ const Workspace = ({ isAuthenticated }) => {
       const newIndex = parent.children.findIndex(c => c.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        setComponents(prev => {
+        setComponentsWithHistory(prev => {
           const cloned = cloneComponents(prev);
           const parentClone = findParentComponent(cloned, active.id);
 
@@ -363,7 +478,7 @@ const Workspace = ({ isAuthenticated }) => {
       let componentData = findComponentById(components, active.id);
       if (!componentData) return;
 
-      setComponents((items) => {
+      setComponentsWithHistory((items) => {
         let newComponents;
         let movingChild = componentData;
 
@@ -461,7 +576,7 @@ const Workspace = ({ isAuthenticated }) => {
 
     remove(cloned);
 
-    setComponents(cloned);
+    setComponentsWithHistory(cloned);
     setSelectedComponentId(null);
     setDeleteTargetId(null);
   };
@@ -493,7 +608,7 @@ const Workspace = ({ isAuthenticated }) => {
   };
 
   const updateComponent = (id, updater) => {
-    setComponents(existingComponent => {
+    setComponentsWithDebouncedHistory(existingComponent => {
       const cloneStructure = cloneComponents(existingComponent);
       updateNodeById(cloneStructure, id, updater);
       return cloneStructure;
@@ -626,7 +741,7 @@ const Workspace = ({ isAuthenticated }) => {
           <Canvas components={components} zoom={zoom} selectedComponentId={selectedComponentId} onSelectComponent={(id) => setSelectedComponentId(id)} clearComponentSelection={clearComponentSelection} />
           <RightSideBar selectedComponent={selectedComponent} updateComponent={updateComponent} deleteComponent={deleteComponent} />
         </div >
-        <Dock zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onReset={handleReset} />
+        <Dock zoom={zoom} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onReset={handleReset} onUndo={handleUndo} onRedo={handleRedo} canUndo={canUndo} canRedo={canRedo} />
         {deleteTargetId && (
           <div className="delete-modal-overlay">
             <div className="delete-modal">

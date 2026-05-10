@@ -43,6 +43,18 @@
      transform: scale(0.95);
 }
 
+/* Disabled state for undo/redo */
+.dock-wrapper svg.dock-icon-disabled {
+     opacity: 0.3;
+     cursor: not-allowed;
+     pointer-events: none;
+}
+
+.dock-wrapper svg.dock-icon-disabled:hover {
+     color: black;
+     transform: none;
+}
+
 
 /* Input */
 .dock-wrapper > input {
